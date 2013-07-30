@@ -1,0 +1,14 @@
+x=-607.4
+y=15.75
+width=1498.65
+height=852.6
+size=68
+alignment=right
+face=Sassoon Infant Std
+characterPosition=normal
+lineSpacing=-4
+rightMargin=0
+leftMargin=0
+letterSpacing=0
+extra_config=var page = {	"textoffset":{		"x":1050,		"y":0	}};
+dictionary_length=18
