@@ -1,0 +1,10 @@
+{
+	"title":"Frank The Fireman",
+	"id":"frank",
+	"author":"Annie Davenport",
+	"description":"Frank is a fireman.  He races to Mrs Jones garden to put out a fire and is surprised by what he finds!",
+	"book":{
+		"page_thickness":14,
+		"animation_time":600
+	}
+}

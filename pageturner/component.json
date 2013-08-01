@@ -1,0 +1,16 @@
+{
+  "name": "storytimeislandbook",
+  "description": "A book for the storytimeisland series",
+  "version": "0.0.3",
+  "keywords": [],
+  "dependencies": {
+    "component/emitter": "*",
+    "component/jquery": "*",
+    "binocarlos/pageturner": "*",
+    "binocarlos/pagefader": "*",
+    "component/hammer.js": "*"
+  },
+  "development": {},
+  "styles": [],
+  "scripts": []
+}

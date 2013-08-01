@@ -20,3 +20,6 @@ Icon?
 # nodejs npm modules
 /node_modules
 components
+androids
+raw_books
+html_books

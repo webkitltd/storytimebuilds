@@ -1,0 +1,49 @@
+<html>
+<head>
+  <title><%= document.config.title %></title>
+  <link rel="stylesheet" type="text/css" href="build/build.css">
+  <link rel="stylesheet" type="text/css" href="book.css">
+  <style type="text/css">
+
+<% 
+  for(var i=0; i<document.pages.length; i++){
+    var no = i+1;
+    var page = document.pages[i];
+
+%>
+
+    #book .pagebg<%- no %>{
+      background:url(images/page<%- no %>.png);
+    }
+
+<% } %>
+  </style>
+</head>
+<body>
+  
+
+  <div id="book">
+<% 
+  for(var i=0; i<document.pages.length; i++){
+    var no = i+1;
+    var page = document.pages[i];
+
+%>
+    <div class="page">
+      <div class="pagebg pagebg<%- no %>">
+        <div class="pagetext"><%= page.text %></div>
+      </div>
+    </div>
+<% 
+  }
+%>        
+  </div>
+    
+  <script>
+    window.$storytimebook = <%- JSON.stringify(document, null, 4) %>;
+  </script>
+  <script src="env.js"></script>
+  <script src="build/build.js"></script>
+  <script src="book.js"></script>
+</body>
+</html>
