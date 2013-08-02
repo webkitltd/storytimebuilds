@@ -38,12 +38,33 @@ html,body{
   user-select: none;
 }
 
-#vshadow{
+#teddybutton{
   position:absolute;
-  width:30px;
-  opacity:.7;
-  background: url(img/shadow_h.png);
-  background-repeat: repeat-y;
+  width:134px;
+  height:99px;
+  right:0px;
+  bottom:0px;
+}
+
+#teddybutton img{
+  padding:0px;
+  margin:0px;
+}
+
+#teddybutton .normal{
+  display:block;
+}
+
+#teddybutton .highlight{
+  display:none;
+}
+
+#shadow{
+  display:none;
+  position:absolute;
+  -moz-box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
+  -webkit-box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
+  box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
 }
 
 .arrow{
@@ -132,12 +153,15 @@ img{
 
 @media only screen and (min-height: 1px) and (max-height: 356px) {
   #book {
-    width: 360px !important;
+    width: 320px !important;
     height: 240px !important;
   }
   .pagetext{
-    font-size:7pt !important;
-    line-height:9pt !important;
+    padding-top:5px !important;
+    padding-left:8px !important;
+    padding-right:8px !important;
+    font-size:12pt !important;
+    line-height:13pt !important;
   }
 }
 
@@ -147,8 +171,11 @@ img{
     height: 357px !important;
   }
   .pagetext{
-    font-size:9.5pt !important;
-    line-height:12.5pt !important;
+    padding-top:8px !important;
+    padding-left:12px !important;
+    padding-right:12px !important;
+    font-size:15pt !important;
+    line-height:17pt !important;
   }
 }
 

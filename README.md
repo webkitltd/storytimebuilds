@@ -26,6 +26,8 @@ If you only want to build HTML books then you can skip Android Development Tools
 
 [download & install](http://nodejs.org/) and install node.js
 
+DONT FORGET TO DO npm install from within this folder to get modules installed
+
 ### ImageMagick
 
 [download & install](http://www.imagemagick.org/script/binary-releases.php#windows)

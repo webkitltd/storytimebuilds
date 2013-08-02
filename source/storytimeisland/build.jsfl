@@ -5,23 +5,7 @@
 	
 */
 
-var mainconfig = {
-
-	// control which book to compile
-	//
-	// set this to all or * to compile all books
-	book:'freddy',
-
-	// export data about the document and text
-	data:true,
-
-	// export the images
-	images:true,
-
-	// export the sprites
-	sprites:false
-}
-
+var exportbook = 'freddy';
 
 /*
 	--------------------------------------------------------------------
@@ -48,15 +32,16 @@ var imageLayer = 3;
 var configLayer = 4;
 
 function runbooks(){
+
 	var books=FLfile.listFolder(baseScriptFolder,"directories");
 
 	for(var i=0; i<books.length; i++){
 		var book = books[i];
 
-		if(mainconfig.book=='*' || mainconfig.book=='all' || mainconfig.book==book){
+		if(book!='book_template' && (exportbook=='*' || exportbook=='all' || exportbook==book)){
 			runbook(book);	
 		}
-	}	
+	}
 }
 
 /*
@@ -137,6 +122,12 @@ function runbook(folder){
 	fl.trace('width: ' + size.width);
 	fl.trace('height: ' + size.height);
 
+	/*
+	
+		loop each frame in the movie, extract the text layer and write a data file to be parsed
+		by the buildscript into JSON for the page
+		
+	*/
 	function export_data(){
 
 		FLfile.remove(dataFolder);
@@ -154,8 +145,12 @@ function runbook(folder){
 	  	var textelem = tl.layers[textLayer].frames[i].elements[0];
 	  	var text = textelem.getTextString();
 
+	  	/*
+	  	
+	  		the config script allows us to inject JSON into the page from within Flash
+	  		
+	  	*/
 	  	var config_script = tl.layers[configLayer].frames[i].actionScript;
-
 	  	config_script = config_script.replace(/[\r\n]/g, '');
 
 	  	if(text=='null'){
@@ -230,68 +225,10 @@ function runbook(folder){
 	  }
 	}
 
-
-	function export_sprites(){
-
-		FLfile.remove(spriteFolder);
-		FLfile.createFolder(spriteFolder);
-
-		var done = false;
-
-		tl.currentFrame = 0;
-		
-
-		// Loop through all the items in the library
-		for(var spriteindex in bookDocument.library.items) {
-		 
-		    // get a reference to the current item
-		    var currentItem = bookDocument.library.items[spriteindex];
-		 		
-		 		if(currentItem.name.indexOf('sprites/')==0){
-
-		 			bookDocument.library.selectItem(currentItem.name);
-		 			bookDocument.library.addItemToDocument({x:bookDocument.width/2, y:bookDocument.height/2});
-
-		 			var spriteelem = bookDocument.selection[0];
-			    var spriteFile = bookFolder + "/" + currentItem.name + ".png";
-
-			    if(spriteelem.height>=spriteelem.width){
-			    	spriteelem.height = bookDocument.height;
-			    	spriteelem.scaleX = spriteelem.scaleY;
-			    }
-			    else{
-			    	spriteelem.width = bookDocument.width;
-			    	spriteelem.scaleY = spriteelem.scaleX;
-			    }
-
-			    fl.trace('---------------------------------------------------------')
-			  	fl.trace('writing sprite: ' + currentItem.name);
-			  	fl.trace('---------------------------------------------------------')
-			  	fl.trace(spriteFile);
-			  	fl.trace('---------------------------------------------------------')
-			    
-			    bookDocument.exportPNG(spriteFile, true , true);
-
-			    bookDocument.selectNone();
-		      bookDocument.selection = [spriteelem];
-		      bookDocument.deleteSelection();
-		      bookDocument.selectNone();
-		 		}
-		    
-		}
-	}
-
 	setup_publish_profile(bookDocument, size);
 	
-	if(mainconfig.data){
-		export_data();	
-	}
-	if(mainconfig.images){
-		export_images();	
-	}
-	if(mainconfig.sprites){
-		export_sprites();
-	}
+	export_data();
+	export_images();	
 	
 	bookDocument.close(false);
 	FLfile.remove(bookcopyFLAPath);
