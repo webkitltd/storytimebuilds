@@ -23,27 +23,33 @@
   
 
   <div id="book">
-<% 
-  for(var i=0; i<document.pages.length; i++){
-    var no = i+1;
-    var page = document.pages[i];
-
-%>
-    <div class="page">
-      <div class="pagebg pagebg<%- no %>">
-        <div class="pagetext"><%= page.text %></div>
-      </div>
-    </div>
-<% 
-  }
-%>        
+      
   </div>
-    
+  
+  <div class="arrow leftarrow"></div>
+  <div class="arrow rightarrow"></div>
   <script>
     window.$storytimebook = <%- JSON.stringify(document, null, 4) %>;
   </script>
   <script src="env.js"></script>
   <script src="build/build.js"></script>
   <script src="book.js"></script>
+  <script>
+    function onDeviceReady(){
+      $(book_ready);
+    }
+
+    if(window.$phonegap){
+      document.addEventListener("deviceready", onDeviceReady, false);
+    }
+    else{
+      $(book_ready);    
+    }
+  </script>  
+
+
+  <!--
+    HERE
+   -->
 </body>
 </html>

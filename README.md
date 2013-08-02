@@ -3,9 +3,24 @@ storytimebuilds
 
 The build folder for storytime island books
 
+## code repositories
+I've only checked in the core code in this repo - otherwise it would be massive.
+
+This means that any books that you build will not be committed back into the code.
+
+This is good - it means that we don't have 20MB files flying around github each time we rebuild.
+
+There is another repository for the officially finished .apk and .html books - [storytimepublished](https://github.com/webkitltd/storytimepublished)
+
+We will manually move the output (the .apks and .html sites) of this repository into published ONCE they have been tested and finialized.
+
+Treat this repository as our factory and the published as the shop front.
+
 ## installation
 
-First we need some things installed:
+First we need some things installed.
+
+If you only want to build HTML books then you can skip Android Development Tools and PhoneGap
 
 ### node.js
 
@@ -23,31 +38,146 @@ First we need some things installed:
 
 [install instructions](http://phonegap.com/install/)
 
-## usage
+### create folders
 
-the folder layout of this repository is as shown:
+Once you have installed - you must create some folders within this repository:
 
- * android_template - the files used to create new android apps
+ * raw_books
+ * html_books
+ * androids
 
- * bin - the script that builds everything
-
- * html_books - the books that are ready for looking at in a browser
-
- * lib - code used by the build script
-
- * node_modules - node.js modules
-
- * pageturner - the pageturner code built into a module for pages
-
- * raw_books - the raw format of book before we convert them to HTML
-
- * source - where we keep the source content for books
 
 ## making a book
+The books are created using the **buildscript** - this is a node.js command line script that knows how to move all the files around to create our books.
 
-### storytimeisland
+### overview of the process
+There are multuple providers of book content - currently iboard and storytimeisland.
 
-#### flash file
+Having multiple providers means we can take on publishing projects for any number of people with exact specifications for their books (i.e. we can sell the publishing press as well as the books)
+
+#### step 1 - preparation of the book
+The book itself needs to be like, actually written and stuff.
+
+The books source lives in /source/[provider].
+
+Each provider has a **book_template** folder - these are the files and extra code for that specific book.
+
+The other folders in each provider folder are the actual books content.
+
+Storytimeisland books are in Flash (more on the format further down).
+
+iboard books are in HTML (again, more later).
+
+Once the book itself has been prepared we get into the world of the build script - this is roughly the same for each provider.
+
+#### step 2 - convert the source book into RAW format
+Our RAW format comprises of the index.html and the images for the book but not any of the code needed to run it.
+
+The scripts to convert a book into RAW format (on Mac \ = /)
+
+**Storytimeisland:**
+
+	node bin\book.js storytimeisland [bookname]
+	node bin\book.js storytimeisland freddy
+
+**iboard:**
+
+	node bin\book.js iboard [bookname]
+	node bin\book.js iboard monsters
+
+This step creates a new folder: **/raw_books/[provider]/[bookname]**
+
+So in the case of storytime freddy:
+
+	/raw_books/storytimeisland/freddy
+
+#### step 3 - convert the RAW book into HTML
+This step merges together the RAW book with our generic page turning code to produce a working HTML site for the book.
+
+This step is the same for each provider.
+
+	// convert a storytimeisland RAW book to HTML
+	node bin\book.js raw storytimeisland\freddy
+
+	// convert an iboard RAW book to HTML
+	node bin\book.js raw iboard\monsters
+
+This step creates a new folder: **/html_books/[provider]/[bookname]**
+
+So in the case of storytime freddy:
+
+	/html_books/storytimeisland/freddy
+
+#### step 4 - view the book
+This step allows you to see the output of the HTML book in a browser.
+
+	// view a storytimeisland book
+	node bin\book.js serve storytimeisland\freddy
+
+	// view an iboard book
+	node bin\book.js serve iboard\monsters
+
+You can then open a browser and type:
+
+	http://localhost
+
+To see the book working.
+
+#### step 5 - create android application
+This step allows you to create a new android application for the HTML book.
+
+	// create a storytimeisland android
+	node bin\book.js createandroid Freddy com.storytimeisland.freddy
+
+	// create an iboard android
+	node bin\book.js createandroid Monsters com.iboard.monsters
+
+NOTE - the domain name part MUST have the book name on the end - it is the ID for the android app
+
+#### step 6 - inject the HTML into the android application
+This step can be repeated without repeating step 5 each time.
+
+It adds our HTML book to the android application - if we change rebuild the HTML book we can skip step 5 meaning we will not replace the entire android just the content.
+
+	// inject HTML into a storytimeisland app
+	node bin\book.js android storytimeisland/freddy Freddy
+
+	// inject HTML into an iboard app
+	node bin\book.js android iboard/monsters Monsters
+
+#### step 7 - building the .apk
+This step must be done within Android Development Tools.
+
+Open ADT (Android Development Tools).
+
+	File -> Import
+
+Choose - 'Android - Existing Android Code Into Workspace'
+
+Browse - choose:
+
+	/androids/[androidname]
+
+So - for Freddy:
+
+	/androids/freddy
+
+It should pick up that there is a book application and allow you to open it.
+
+Next step - right click on the project -> Run As -> Android Application.
+
+This will build the .apk and run either an emulator or upload it to a connected device.
+
+Either way - there is now an .apk inside the /bin folder of the android application - so for Freddy:
+
+	/androids/freddy/bin/Freddy.apk
+
+Now exists.
+
+## storytimeisland books
+This part describes the Flash format for StoryTimeIsland Books
+
+### flash file
 First you need a flash file for the book - use freddy as reference.
 
 Once you have a flash file - create a new folder for it to live in:
@@ -67,7 +197,7 @@ So if our book is freddy and this repository is c:\work\storytimebuild - then we
 
 	c:\work\storytimebuild\source\storytimeisland\freddy\src\artwork.fla
 
-#### building the flash file
+### building the flash file
 Open flash - then File -> Open
 
 Open the build.jsfl which lives:
@@ -100,3 +230,6 @@ This controls what book is created - change the book:'freddy' to whatever the na
 
 There is a little run button - click it, the flash file should open and start compiling - don't worry nothing is getting deleted.
 
+It will output everything into images and data - once the flash has exported - we can copy the images and data folders into the source for the book.
+
+NOTE ^^^ these instructions are very hazy coz I'm bored of writing documentation now - ask me for more info : )

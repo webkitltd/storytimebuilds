@@ -9,7 +9,7 @@ function book_ready(){
       event.preventDefault();
   }
 
-  var is_3d = false;
+  var is_3d = true;
 
   if(window.$phonegap){
     /*
@@ -22,8 +22,6 @@ function book_ready(){
         is_3d = false;
       }
     }
-    
-    $('#debug').html('3d = ' + is_3d);
   }
   
   var book;
@@ -99,6 +97,11 @@ function book_ready(){
     else{
       $('.rightarrow').show(); 
     }
+
+    if(book.triggernext){
+      book.triggernext();
+      book.triggernext = null;
+    }
   })
 
   book.on('animate', function(side){
@@ -110,20 +113,21 @@ function book_ready(){
   })
 
   hammertime.ondragstart = function(ev){
-    if(dragging || animating || loading){
-      return;
-    }
-
     dragging = true;
-
   }
 
   hammertime.ondrag = function(ev){
-    if(!dragging || animating || loading){
+    if(!dragging){
       return;
     }
 
     if(ev.distance>=15){
+      if(animating || loading){
+        book.triggernext = function(){
+          book.animate_direction(ev.direction=='left' ? 1 : -1);    
+        }
+        return;
+      }
       dragging = false;
       book.animate_direction(ev.direction=='left' ? 1 : -1);  
     }
@@ -140,7 +144,16 @@ function book_ready(){
     if(!$(elem).hasClass('arrow')){
       return;
     }
-    book.animate_direction($(elem).hasClass('leftarrow') ? -1 : 1);
+
+    if(animating || loading){
+      book.triggernext = function(){
+        book.animate_direction($(elem).hasClass('leftarrow') ? -1 : 1);
+      }
+      return;
+    }
+    else{
+      book.animate_direction($(elem).hasClass('leftarrow') ? -1 : 1);
+    }
   }
 
 

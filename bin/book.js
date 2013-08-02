@@ -142,6 +142,29 @@ program
   })
 
 program
+  .command('storytimeisland_template [name]')
+  .description('re-generate a storytimeisland books template')
+  .action(function(name, mode){
+    
+    var inputfolder = path.normalize(__dirname + '/../source/storytimeisland/' + name);
+    var outputfolder = path.normalize(__dirname + '/../raw_books/storytimeisland/' + name);
+    var outputfolder2 = path.normalize(__dirname + '/../html_books/storytimeisland/' + name);
+
+    var data = new BookData(name, inputfolder);
+
+    data.load(function(){
+      var template = new BookTemplate(path.normalize(__dirname + '/../source/storytimeisland/book_template/index.ejs'), data);
+
+      var html = template.render();
+      fs.writeFileSync(outputfolder + '/index.html', html, 'utf8');
+      fs.writeFileSync(outputfolder2 + '/index.html', html, 'utf8');
+
+
+    })
+
+  })
+
+program
   .command('storytimeisland [name]')
   .description('convert a storytimeisland book to raw output')
   .action(function(name, mode){
