@@ -232,4 +232,11 @@ There is a little run button - click it, the flash file should open and start co
 
 It will output everything into images and data - once the flash has exported - we can copy the images and data folders into the source for the book.
 
-NOTE ^^^ these instructions are very hazy coz I'm bored of writing documentation now - ask me for more info : )
+### converting images
+
+The storytimeisland books have images up to the edges and so we must make sure they are all resized OK.
+
+You only need to run this once after each Flash export.
+
+	// convert images for a storytimeisland book
+	node bin\book.js storytimeisland_images freddy

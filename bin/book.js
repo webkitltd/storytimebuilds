@@ -45,14 +45,14 @@ function run_commands(commands, done){
 }
 
 program
-  .command('singlebook [provider] [book]')
+  .command('singlebook [provider] [book] [quickmode]')
   .description('build html for a single book')
-  .action(function(provider, book){
+  .action(function(provider, book, quickmode){
 
     process.env.NODE_ENV = 'development';
 
     var commands = [
-      provider + ' ' + book,
+      provider + ' ' + book + (quickmode ? ' ' + quickmode : ''),
       'raw ' + provider + '/' + book,
       'serve ' + provider + '/' + book
     ]
@@ -164,10 +164,40 @@ program
 
   })
 
+
+program
+  .command('storytimeisland_images [name]')
+  .description('convert the storytimeisland images')
+  .action(function(name, quickmode){
+
+    process.env.NODE_ENV = 'development';
+
+    var inputfolder = path.normalize(__dirname + '/../source/storytimeisland/' + name);
+
+    var imageinput = inputfolder + '/images';
+    var imageoutput = inputfolder + '/resizedimages';
+    wrench.mkdirSyncRecursive(imageoutput);
+
+    var processor = new ImageProcessor(imageinput, imageoutput, [{
+      width:1024,
+      height:768
+    },{
+      width:102,
+      height:77,
+      name:'thumb'
+    }])
+
+    processor.process(function(){
+      console.log('-------------------------------------------');
+      console.log('done');
+    });
+    
+  })
+
 program
   .command('storytimeisland [name]')
   .description('convert a storytimeisland book to raw output')
-  .action(function(name, mode){
+  .action(function(name, quickmode){
 
     process.env.NODE_ENV = 'development';
 
@@ -188,40 +218,25 @@ program
       wrench.copyDirSyncRecursive(inputfolder + '/audio', outputfolder + '/audio');
     }
 
-    async.series([
-      function(next){
+    if(fs.existsSync(inputfolder + '/resizedimages')){
+      wrench.copyDirSyncRecursive(inputfolder + '/resizedimages', outputfolder + '/images');
+    }
 
-        var data = new BookData(name, inputfolder);
 
-        data.load(function(){
-          var template = new BookTemplate(path.normalize(__dirname + '/../source/storytimeisland/book_template/index.ejs'), data);
 
-          var html = template.render();
-          fs.writeFileSync(outputfolder + '/index.html', html, 'utf8');
-          fs.unlinkSync(outputfolder + '/index.ejs');
-          next();
+    var data = new BookData(name, inputfolder);
 
-        })
+    data.load(function(){
+      var template = new BookTemplate(path.normalize(__dirname + '/../source/storytimeisland/book_template/index.ejs'), data);
 
-      },
-
-      function(next){
-
-        var imageinput = inputfolder + '/images';
-        var imageoutput = outputfolder + '/images';
-        wrench.mkdirSyncRecursive(outputfolder + '/images');
-
-        var processor = new ImageProcessor(imageinput, imageoutput, {
-          width:1024,
-          height:768
-        })
-
-        processor.process(next);
-      }
-    ], function(){
+      var html = template.render();
+      fs.writeFileSync(outputfolder + '/index.html', html, 'utf8');
+      fs.unlinkSync(outputfolder + '/index.ejs');
       console.log('-------------------------------------------');
       console.log('done');
+
     })
+
     
   })
 

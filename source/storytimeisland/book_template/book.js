@@ -2,6 +2,7 @@
 
 var $ = require('jquery');
 var Hammer = require('hammer');
+var has3d = require('has-translate3d');
 
 function book_ready(){
 
@@ -9,7 +10,7 @@ function book_ready(){
       event.preventDefault();
   }
 
-  var is_3d = true;
+  var is_3d = has3d;
 
   if(window.$phonegap){
     /*
@@ -59,7 +60,7 @@ function book_ready(){
       bookselector:'#book',
       pageselector:'.page',
       apply_pageclass:'bookpage',
-      startpage:0,
+      startpage:18,
       perspective:950
     })
   }
@@ -102,6 +103,18 @@ function book_ready(){
       left:xpos + 'px',
       top:ypos + 'px'
     })
+
+    $('#hshadow').css({
+      left:(xpos) + 'px',
+      top:(ypos + newsize.height) + 'px',
+      width:(newsize.width) + 'px'
+    })
+
+    $('#vshadow').css({
+      left:(xpos + newsize.width) + 'px',
+      top:(ypos) + 'px',
+      height:(newsize.height) + 'px'
+    })
   })
 
   book.on('load', function(index){
@@ -131,10 +144,16 @@ function book_ready(){
   })
 
   book.on('animate', function(side){
+    if(book.currentpage==pagecount-2 && side=='right'){
+      $('#vshadow').hide();
+    }
     animating = true;
   })
 
   book.on('animated', function(side){
+    if(book.currentpage==pagecount-1 && side=='left'){
+      $('#vshadow').show();
+    }
     animating = false;
   })
 

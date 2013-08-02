@@ -6,6 +6,7 @@
   "dependencies": {
     "component/emitter": "*",
     "component/jquery": "*",
+    "component/has-translate3d": "*",
     "binocarlos/pageturner": "*",
     "binocarlos/pagefader": "*",
     "component/hammer.js": "*"

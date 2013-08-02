@@ -9976,6 +9976,28 @@ if ( typeof define === "function" && define.amd && define.amd.jQuery ) {
 })( window );
 
 });
+require.register("component-transform-property/index.js", function(exports, require, module){
+
+var styles = [
+  'webkitTransform',
+  'MozTransform',
+  'msTransform',
+  'OTransform',
+  'transform'
+];
+
+var el = document.createElement('p');
+var style;
+
+for (var i = 0; i < styles.length; i++) {
+  style = styles[i];
+  if (null != el.style[style]) {
+    module.exports = style;
+    break;
+  }
+}
+
+});
 require.register("component-has-translate3d/index.js", function(exports, require, module){
 
 var prop = require('transform-property');
@@ -9997,28 +10019,6 @@ document.body.insertBefore(el, null);
 var val = getComputedStyle(el).getPropertyValue(map[prop]);
 document.body.removeChild(el);
 module.exports = null != val && val.length && 'none' != val;
-
-});
-require.register("component-transform-property/index.js", function(exports, require, module){
-
-var styles = [
-  'webkitTransform',
-  'MozTransform',
-  'msTransform',
-  'OTransform',
-  'transform'
-];
-
-var el = document.createElement('p');
-var style;
-
-for (var i = 0; i < styles.length; i++) {
-  style = styles[i];
-  if (null != el.style[style]) {
-    module.exports = style;
-    break;
-  }
-}
 
 });
 require.register("binocarlos-pageturner/index.js", function(exports, require, module){
@@ -11303,6 +11303,10 @@ require.alias("component-indexof/index.js", "component-emitter/deps/indexof/inde
 
 require.alias("component-jquery/index.js", "storytimeislandbook/deps/jquery/index.js");
 require.alias("component-jquery/index.js", "jquery/index.js");
+
+require.alias("component-has-translate3d/index.js", "storytimeislandbook/deps/has-translate3d/index.js");
+require.alias("component-has-translate3d/index.js", "has-translate3d/index.js");
+require.alias("component-transform-property/index.js", "component-has-translate3d/deps/transform-property/index.js");
 
 require.alias("binocarlos-pageturner/index.js", "storytimeislandbook/deps/pageturner/index.js");
 require.alias("binocarlos-pageturner/templates/booktemplate.js", "storytimeislandbook/deps/pageturner/templates/booktemplate.js");
