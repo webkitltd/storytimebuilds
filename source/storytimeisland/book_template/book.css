@@ -40,8 +40,6 @@ html,body{
 
 #teddybutton{
   position:absolute;
-  width:134px;
-  height:99px;
   right:0px;
   bottom:0px;
 }
@@ -75,17 +73,25 @@ html,body{
 }
 
 .leftarrow{
+  cursor:pointer;
+  padding-right:50px;
   position:absolute;
   left:10px;
   top:40%;
   background:url(img/leftarrow.png);
+  background-repeat: no-repeat;
+  background-position: 0% 50%;
 }
 
 .rightarrow{
+  cursor:pointer;
+  padding-left:50px;
   position:absolute;
   right:10px;
   top:40%;
   background:url(img/rightarrow.png);
+  background-repeat: no-repeat;
+  background-position: 100% 50%;
 }
 
 img{
@@ -123,9 +129,9 @@ img{
 }
 
 .boxshadow{
-  -moz-box-shadow: 10px 10px 5px #888;
-  -webkit-box-shadow: 10px 10px 5px #888;
-  box-shadow: 10px 10px 5px #888;
+  -moz-box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
+  -webkit-box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
+  box-shadow: 10px 10px 10px rgba(0,0,0,0.5);
 }
 
 #book{  
@@ -151,6 +157,121 @@ img{
 }
 
 
+.dictionarytab{
+  cursor:default;
+  position: absolute;
+  font-family: Sassoon;
+  font-size:18pt;
+  text-align: center;
+  padding:5px;
+  padding-left:20px;
+  padding-right:20px;
+  background-color:rgba(255,255,255,0.8);
+  /*border:1px dotted #000;*/
+  -webkit-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;  
+  box-shadow:3px 3px 5px rgba(0,0,0,.5);
+  z-index: 1232;
+  transform:scale(0.1,0.1);
+  -webkit-transform:scale(0.1,0.1);
+  -ms-transform:scale(0.1,0.1);
+  -moz-transform:scale(0.1,0.1);
+}
+
+.animator{
+
+/*
+  -webkit-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+  -moz-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+  -ms-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+  -o-transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+  transition: 400ms cubic-bezier(0.250, 0.250, 0.750, 0.750) all;
+*/  
+
+  -webkit-transition: 400ms linear all;
+  -moz-transition: 400ms linear all;
+  -ms-transition: 400ms linear all;
+  -o-transition: 400ms linear all;
+  transition: 400ms linear all;
+}
+
+.animatorquick{
+
+
+  -webkit-transition: 100ms ease-in-out all;
+  -moz-transition: 100ms ease-in-out all;
+  -ms-transition: 100ms ease-in-out all;
+  -o-transition: 100ms ease-in-out all;
+  transition: 100ms ease-in-out all;
+}
+
+
+#teddy{
+  transform-origin:0% 100%;
+  -webkit-transform-origin:0% 100%;
+  -ms-transform-origin:0% 100%;
+  -moz-transform-origin:0% 100%;
+  transform:scale(1,1);
+  -webkit-transform:scale(.5,.5);
+  -ms-transform:scale(.5,.5);
+  -moz-transform:scale(.5,.5);
+  position:absolute;
+  left:0px;
+  bottom:0px;
+}
+
+#teddy .body{
+  position:relative;
+  left:0px;
+  top:0px;
+  width:131px;
+  height:307px;
+  background:url(../img/teddy/base.png);
+}
+
+#teddy .lefteye{
+  position: absolute;
+  left:40px;
+  top:35px;
+  width:17px;
+  height:18px;
+  background:url(../img/teddy/eyes.png);
+}
+
+#teddy .righteye{
+  position: absolute;
+  left:79px;
+  top:35px;
+  width:17px;
+  height:18px;
+  background:url(../img/teddy/eyes.png);
+}
+
+#teddy .mouth{
+  position: absolute;
+  left:47px;
+  top:57px;
+  width:39px;
+  height:32px;
+  background:url(../img/teddy/mouth.png);
+}
+
+#teddy .arm{
+  position: absolute;
+  left:93px;
+  top:67px;
+  width:92px;
+  height:122px;
+  background:url(../img/teddy/arms.png);
+}
+
+
+.pointercursor{
+  cursor: pointer;
+}
+
 @media only screen and (min-height: 1px) and (max-height: 356px) {
   #book {
     width: 320px !important;
@@ -162,6 +283,38 @@ img{
     padding-right:8px !important;
     font-size:12pt !important;
     line-height:13pt !important;
+  }
+
+  #frontpageimage{
+    margin-top:5px;
+    height:100px;
+  }
+
+  #nobubbleimage{
+    height:40px;
+    margin-top:20px;
+    margin-right:10px;
+  }
+
+  #bubbleimage{
+    height:40px;
+    margin-top:20px;
+    margin-left:10px;
+  }
+
+  #teddybutton img{
+    width:80px;
+  }
+
+  #logoimage{
+    margin-top:5px;
+    height:30px; 
+  }
+
+
+
+  .dictionarytab{
+    font-size:14pt;
   }
 }
 
@@ -177,6 +330,36 @@ img{
     font-size:15pt !important;
     line-height:17pt !important;
   }
+
+  #frontpageimage{
+    margin-top:10px;
+    height:150px;
+  }
+
+  #nobubbleimage{
+    height:60px;
+    margin-top:30px;
+    margin-right:20px;
+  }
+
+  #bubbleimage{
+    height:60px;
+    margin-top:30px;
+    margin-left:20px;
+  }
+
+  #teddybutton img{
+    width:100px;
+  }  
+
+  #logoimage{
+    margin-top:10px;
+    height:60px; 
+  }
+
+  .dictionarytab{
+    font-size:16pt;
+  }
 }
 
 @media only screen and (min-height: 510px) and (max-height: 599px) {
@@ -190,6 +373,32 @@ img{
     padding-right:15px !important;
     font-size:18pt !important;
     line-height:22pt !important;
+  }
+
+  #frontpageimage{
+    margin-top:15px;
+    height:200px;
+  }
+
+ #nobubbleimage{
+    height:80px;
+    margin-top:40px;
+    margin-right:30px;
+  }
+
+  #bubbleimage{
+    height:80px;
+    margin-top:40px;
+    margin-left:30px;
+  }
+
+  #teddybutton img{
+    width:120px;
+  }    
+
+  #logoimage{
+    margin-top:25px;
+    height:90px; 
   }
 }
 
@@ -205,6 +414,31 @@ img{
     font-size:24pt !important;
     line-height:30pt !important;
   }
+  #frontpageimage{
+    margin-top:20px;
+    height:300px;
+  }
+
+  #nobubbleimage{
+    height:100px;
+    margin-top:50px;
+    margin-right:40px;
+  }
+
+  #bubbleimage{
+    height:100px;
+    margin-top:40px;
+    margin-left:40px;
+  }
+
+  #teddybutton img{
+    width:140px;
+  } 
+
+  #logoimage{
+    margin-top:20px;
+    height:120px; 
+  }
 }
 
 @media only screen and (min-height: 768px) {
@@ -218,6 +452,33 @@ img{
     padding-right:30px !important;
     font-size:34pt !important;
     line-height: 38pt !important;
+  }
+
+  #frontpageimage{
+    margin-top:30px;
+    height:400px;
+  }
+
+
+  #nobubbleimage{
+    height:120px;
+    margin-top:60px;
+    margin-right:50px;
+  }
+
+  #bubbleimage{
+    height:120px;
+    margin-top:50px;
+    margin-left:60px;
+  }
+
+  #teddybutton img{
+    width:160px;
+  }  
+
+  #logoimage{
+    margin-top:30px;
+    height:120px; 
   }
 }
 

@@ -22,6 +22,9 @@
 <body>
   
   <div id="shadow"></div>
+  <div id="home">
+
+  </div>
   <div id="book">
       
   </div>
@@ -32,22 +35,48 @@
     <img class="highlight" src="img/cornertabactive.png" />
   </div>
   
+  <script id="homepagetemplate" type="text/template">
+    <table width="100%">
+      <tr>
+        <td colspan=3 align=center height=1>
+          <img id="logoimage" src="img/logo.png" />
+        </td>
+      </tr>
+      <tr>
+        <td width=50% align=right valign=top>
+          <img id="nobubbleimage" class="pointercursor" src="img/nobubble.png" />
+        </td>
+        <td align=center width=1>
+          <img id="frontpageimage" class="pointercursor boxshadow" src="icons/frontpage.png" />
+        </td>
+        <td width=50% align=left valign=top>
+          <img id="bubbleimage" class="pointercursor" src="img/bubble.png" />
+        </td>
+      </tr>
+    </table>
+  </script>
+
   <script>
     window.$storytimebook = <%- JSON.stringify(document, null, 4) %>;
   </script>
   <script src="env.js"></script>
   <script src="build/build.js"></script>
   <script src="book.js"></script>
+  <script src="home.js"></script>
+  <script src="dictionary.js"></script>
+  <script src="app.js"></script>
   <script>
+    var $ = require('jquery');
+
     function onDeviceReady(){
-      $(book_ready);
+      $(window.$storytimeisland_application);
     }
 
     if(window.$phonegap){
       document.addEventListener("deviceready", onDeviceReady, false);
     }
     else{
-      $(book_ready);    
+      onDeviceReady();
     }
   </script>  
 
