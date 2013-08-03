@@ -44,26 +44,48 @@
       </tr>
       <tr>
         <td width=50% align=right valign=top>
-          <img id="nobubbleimage" class="pointercursor" src="img/nobubble.png" />
+          <div id="nobubblebutton" class="pointercursor">
+            <img id="nobubbleimage" src="img/nobubble.png" /><br /><br />
+            <div id="nobubbletab" class="homepagetab">grownup reads</div>
+          </div>
         </td>
         <td align=center width=1>
           <img id="frontpageimage" class="pointercursor boxshadow" src="icons/frontpage.png" />
         </td>
         <td width=50% align=left valign=top>
-          <img id="bubbleimage" class="pointercursor" src="img/bubble.png" />
+          <div id="bubblebutton" class="pointercursor">
+            <img id="bubbleimage" src="img/bubble.png" /><br /><br />
+            <div id="bubbletab" class="homepagetab">reads itself</div>
+          </div>
         </td>
       </tr>
     </table>
+    <div id="teddyholder"></div>
+  </script>
+
+  <script id="teddytemplate" type="text/template">
+    <div id="teddy">
+      <div class="body"></div>
+      <div class="lefteye"></div>
+      <div class="righteye"></div>
+      <div class="mouth"></div>
+      <div class="arm"></div>
+    </div>
   </script>
 
   <script>
     window.$storytimebook = <%- JSON.stringify(document, null, 4) %>;
   </script>
   <script src="env.js"></script>
+  <script src="buzz.js"></script>
+  <script src="motio.js"></script>
   <script src="build/build.js"></script>
+  <script src="platform.js"></script>
+  <script src="media.js"></script>
+  <script src="dictionary.js"></script>
+  <script src="teddy.js"></script>
   <script src="book.js"></script>
   <script src="home.js"></script>
-  <script src="dictionary.js"></script>
   <script src="app.js"></script>
   <script>
     var $ = require('jquery');

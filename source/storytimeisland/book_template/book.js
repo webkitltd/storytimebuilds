@@ -4,6 +4,7 @@ window.$storytimeisland_book = function(bookselector, html){
 
   var $ = require('jquery');
   var has3d = require('has-translate3d');
+  var Emitter = require('emitter');
 
   var is_3d = has3d;
 
@@ -259,12 +260,20 @@ window.$storytimeisland_book = function(bookselector, html){
 
     book.render();
 
+    book.destroy = function(){
+      $(bookselector).html('');
+    }
+
+
     return book;
   }
 
-  book_factory.destroy = function(){
-    $(bookselector).html('');
+
+
+  for(var i in Emitter.prototype){
+    book_factory[i] = Emitter.prototype[i];
   }
+
 
   return book_factory;
 

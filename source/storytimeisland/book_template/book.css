@@ -156,16 +156,29 @@ img{
   text-align: left;
 }
 
+.homepagetab{
+  
+  font-family: Sassoon;
+
+  text-align: center;
+  
+  
+  background-color:rgba(255,255,255,0.8);
+  /*border:1px dotted #000;*/
+  -webkit-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -moz-border-radius: 10px;
+  border-radius: 10px;  
+  box-shadow:3px 3px 5px rgba(0,0,0,.5);
+}
 
 .dictionarytab{
   cursor:default;
   position: absolute;
   font-family: Sassoon;
-  font-size:18pt;
+
   text-align: center;
-  padding:5px;
-  padding-left:20px;
-  padding-right:20px;
+  
   background-color:rgba(255,255,255,0.8);
   /*border:1px dotted #000;*/
   -webkit-border-radius: 10px;
@@ -213,13 +226,9 @@ img{
   -webkit-transform-origin:0% 100%;
   -ms-transform-origin:0% 100%;
   -moz-transform-origin:0% 100%;
-  transform:scale(1,1);
-  -webkit-transform:scale(.5,.5);
-  -ms-transform:scale(.5,.5);
-  -moz-transform:scale(.5,.5);
   position:absolute;
-  left:0px;
-  bottom:0px;
+
+  
 }
 
 #teddy .body{
@@ -228,7 +237,7 @@ img{
   top:0px;
   width:131px;
   height:307px;
-  background:url(../img/teddy/base.png);
+  background:url(img/teddy/base.png);
 }
 
 #teddy .lefteye{
@@ -237,7 +246,7 @@ img{
   top:35px;
   width:17px;
   height:18px;
-  background:url(../img/teddy/eyes.png);
+  background:url(img/teddy/eyes.png);
 }
 
 #teddy .righteye{
@@ -246,7 +255,7 @@ img{
   top:35px;
   width:17px;
   height:18px;
-  background:url(../img/teddy/eyes.png);
+  background:url(img/teddy/eyes.png);
 }
 
 #teddy .mouth{
@@ -255,7 +264,7 @@ img{
   top:57px;
   width:39px;
   height:32px;
-  background:url(../img/teddy/mouth.png);
+  background:url(img/teddy/mouth.png);
 }
 
 #teddy .arm{
@@ -264,12 +273,25 @@ img{
   top:67px;
   width:92px;
   height:122px;
-  background:url(../img/teddy/arms.png);
+  background:url(img/teddy/arms.png);
 }
 
 
 .pointercursor{
   cursor: pointer;
+}
+
+#nobubblebutton{
+  visibility:hidden;
+}
+
+#bubblebutton{
+  visibility:hidden;
+}
+
+#teddybutton{
+  cursor: pointer;
+  display:none;
 }
 
 @media only screen and (min-height: 1px) and (max-height: 356px) {
@@ -285,9 +307,18 @@ img{
     line-height:13pt !important;
   }
 
+
   #frontpageimage{
     margin-top:5px;
     height:100px;
+  }
+
+  #nobubbletab{
+    margin-right:10px;
+  }
+
+  #bubbletab{
+    margin-left:10px;
   }
 
   #nobubbleimage{
@@ -314,7 +345,27 @@ img{
 
 
   .dictionarytab{
-    font-size:14pt;
+    font-size:10pt;
+    padding:4px;
+    padding-left:5px;
+    padding-right:5px;
+  }
+
+  .homepagetab{
+    width:70px;
+    font-size:9pt;
+    padding:2px;
+    padding-left:3px;
+    padding-right:3px;
+  }
+
+  #teddy{
+    left:10px;
+    bottom:10px;
+    transform:scale(.35,.35);
+    -webkit-transform:scale(.35,.35);
+    -ms-transform:scale(.35,.35);
+    -moz-transform:scale(.35,.35);
   }
 }
 
@@ -334,6 +385,14 @@ img{
   #frontpageimage{
     margin-top:10px;
     height:150px;
+  }
+
+  #nobubbletab{
+    margin-right:20px;
+  }
+
+  #bubbletab{
+    margin-left:20px;
   }
 
   #nobubbleimage{
@@ -358,8 +417,28 @@ img{
   }
 
   .dictionarytab{
-    font-size:16pt;
+    font-size:12pt;
+    padding:7px;
+    padding-left:10px;
+    padding-right:10px;
   }
+
+  .homepagetab{
+    width:120px;
+    font-size:11pt;
+    padding:5px;
+    padding-left:10px;
+    padding-right:10px;
+  }
+
+  #teddy{
+    left:12px;
+    bottom:12px;
+    transform:scale(.50,.50);
+    -webkit-transform:scale(.50,.50);
+    -ms-transform:scale(.50,.50);
+    -moz-transform:scale(.50,.50);
+  }  
 }
 
 @media only screen and (min-height: 510px) and (max-height: 599px) {
@@ -380,7 +459,15 @@ img{
     height:200px;
   }
 
- #nobubbleimage{
+  #nobubbletab{
+    margin-right:30px;
+  }
+
+  #bubbletab{
+    margin-left:30px;
+  }
+
+  #nobubbleimage{
     height:80px;
     margin-top:40px;
     margin-right:30px;
@@ -400,6 +487,32 @@ img{
     margin-top:25px;
     height:90px; 
   }
+
+
+  .dictionarytab{
+    font-size:15pt;
+    padding:8px;
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+
+  .homepagetab{
+    width:140px;
+    font-size:12pt;
+    padding:5px;
+    padding-left:12px;
+    padding-right:12px;
+  }
+
+  #teddy{
+    left:15px;
+    bottom:15px;
+    transform:scale(.75,.75);
+    -webkit-transform:scale(.75,.75);
+    -ms-transform:scale(.75,.75);
+    -moz-transform:scale(.75,.75);
+  }  
 }
 
 @media only screen and (min-height: 600px) and (max-height: 767px) {
@@ -419,6 +532,14 @@ img{
     height:300px;
   }
 
+  #nobubbletab{
+    margin-right:40px;
+  }
+
+  #bubbletab{
+    margin-left:40px;
+  }
+
   #nobubbleimage{
     height:100px;
     margin-top:50px;
@@ -427,7 +548,7 @@ img{
 
   #bubbleimage{
     height:100px;
-    margin-top:40px;
+    margin-top:50px;
     margin-left:40px;
   }
 
@@ -438,6 +559,30 @@ img{
   #logoimage{
     margin-top:20px;
     height:120px; 
+  }
+
+  .dictionarytab{
+    font-size:16pt;
+    padding:9px;
+    padding-left:14px;
+    padding-right:14px;
+  }
+
+  .homepagetab{
+    width:170px;
+    font-size:14pt;
+    padding:5px;
+    padding-left:15px;
+    padding-right:15px;
+  }
+
+  #teddy{
+    left:17px;
+    bottom:17px;
+    transform:scale(.85,.85);
+    -webkit-transform:scale(.85,.85);
+    -ms-transform:scale(.85,.85);
+    -moz-transform:scale(.85,.85);
   }
 }
 
@@ -459,6 +604,14 @@ img{
     height:400px;
   }
 
+  #nobubbletab{
+    margin-right:50px;
+  }
+
+  #bubbletab{
+    margin-left:50px;
+  }
+
 
   #nobubbleimage{
     height:120px;
@@ -468,8 +621,8 @@ img{
 
   #bubbleimage{
     height:120px;
-    margin-top:50px;
-    margin-left:60px;
+    margin-top:60px;
+    margin-left:50px;
   }
 
   #teddybutton img{
@@ -479,6 +632,30 @@ img{
   #logoimage{
     margin-top:30px;
     height:120px; 
+  }
+
+  .dictionarytab{
+    font-size:19pt;
+    padding:10px;
+    padding-left:15px;
+    padding-right:15px;
+  }
+
+  .homepagetab{
+    width:200px;
+    font-size:18pt;
+    padding:5px;
+    padding-left:20px;
+    padding-right:20px;
+  }
+
+  #teddy{
+    left:20px;
+    bottom:20px;
+    transform:scale(1,1);
+    -webkit-transform:scale(1,1);
+    -ms-transform:scale(1,1);
+    -moz-transform:scale(1,1);
   }
 }
 

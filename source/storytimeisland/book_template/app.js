@@ -51,11 +51,32 @@ window.$storytimeisland_application = function(){
   };
 
   var templates = {
-    homepage:$('#homepagetemplate').text()
+    homepage:$('#homepagetemplate').text(),
+    teddy:$('#teddytemplate').text()
   };
 
   var book_factory = window.$storytimeisland_book('#book', html);
   var home_factory = window.$storytimeisland_home('#home', templates, global_settings);
+  var media = window.$storytimeisland_media(window.$storytimebook, global_settings);
+
+  media.on('loaded:all', function(){
+    show_home();
+  })
+
+  media.on('loaded:sound', function(src){
+    
+  })
+
+
+  home_factory.on('teddysound', function(){
+    media.playsound('audio/teddy/all');
+  })
+
+  home_factory.on('loadbook', function(){
+    media.stopsounds();
+    activemodule.destroy();
+    show_book();
+  })
 
 
   /*
@@ -93,9 +114,25 @@ window.$storytimeisland_application = function(){
     }
   }
 
-  setTimeout(function(){
+
+
+
+  function show_home(){
+    activemodule = home_factory();
+  }
+
+  function show_book(){
     activemodule = book_factory();
-  }, 100);
+  }
+
+  function load_all(){
+    media.load({
+      sounds:['audio/teddy/all']
+    })
+  }
+  
+
+  setTimeout(load_all, 100);
 
 
 
