@@ -222,6 +222,10 @@ program
       wrench.copyDirSyncRecursive(inputfolder + '/resizedimages', outputfolder + '/images');
     }
 
+    if(fs.existsSync(inputfolder + '/icons')){
+      wrench.copyDirSyncRecursive(inputfolder + '/icons', outputfolder + '/icons');
+    }
+
 
 
     var data = new BookData(name, inputfolder);

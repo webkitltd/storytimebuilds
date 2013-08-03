@@ -10,6 +10,8 @@ window.$storytimeisland_book = function(bookselector, html){
 
   var startpage = 0;
 
+  var rendered = false;
+
   if(window.$phonegap){
     /*
     
@@ -95,7 +97,7 @@ window.$storytimeisland_book = function(bookselector, html){
 
 
     book.on('ready', function(){
-      $(bookselector).addClass('dropshadow');
+      //$(bookselector).addClass('dropshadow');
     })
 
     book.on('resize', function(newsize){
@@ -106,8 +108,8 @@ window.$storytimeisland_book = function(bookselector, html){
         currentsize.ratio = currentsize.width / window.$storytimebook.config.width;
 
         var windowsize = {
-          width:$(window).width(),
-          height:$(window).height()
+          width:window.innerWidth,
+          height:window.innerHeight
         }
 
         var xpos = windowsize.width/2 - newsize.width/2;
@@ -142,38 +144,54 @@ window.$storytimeisland_book = function(bookselector, html){
     book.on('loaded', function(index){
       loading = false;
       if(index<=0){
-        $('.leftarrow').hide();
+        $('.leftarrow').css({
+          display:'none'
+        })
       }
       else{
-        $('.leftarrow').show(); 
+        $('.leftarrow').css({
+          display:'block'
+        }); 
       }
 
       if(index>=pagecount-1){
-        $('.rightarrow').hide();
+        $('.rightarrow').css({
+          display:'none'
+        })
       }
       else{
-        $('.rightarrow').show(); 
+        $('.rightarrow').css({
+          display:'block'
+        })
       }
 
-      $('#shadow').show();
+      $('#shadow').css({
+        display:'block'
+      })
+
+      activedictionary = window.$storytimeisland_dictionary(get_page_data(index), currentpos, currentsize);
+
+      activedictionary.on('sound', function(mp3){
+        book_factory.emit('dictionary', mp3);
+      })
 
       if(book.triggernext){
         book.triggernext();
         book.triggernext = null;
       }
+      else{
+        book_factory.emit('view:page', index);
+      }
 
-      activedictionary = window.$storytimeisland_dictionary(get_page_data(index), currentpos, currentsize);
+      
 
-
+      
     })
 
     book.on('animate', function(side){
-      //apply_shadow(side);
-
       if(activedictionary){
         activedictionary.reset();
       }
-      
 
       if(book.currentpage==1 && side=='left'){
         apply_shadow(0);
@@ -183,6 +201,7 @@ window.$storytimeisland_book = function(bookselector, html){
       }
 
       animating = true;
+      book_factory.emit('animate');
     })
 
     book.on('animated', function(side){
@@ -210,7 +229,7 @@ window.$storytimeisland_book = function(bookselector, html){
       if(ev.distance>=15){
         if(animating || loading){
           book.triggernext = function(){
-            book.animate_direction(ev.direction=='left' ? 1 : -1);    
+            book.animate_direction(ev.direction=='left' ? 1 : -1);
           }
           return;
         }

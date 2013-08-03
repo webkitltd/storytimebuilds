@@ -38,6 +38,10 @@ html,body{
   user-select: none;
 }
 
+#bookviewer{
+  display:none;
+}
+
 #teddybutton{
   position:absolute;
   right:0px;

@@ -14,6 +14,7 @@
 window.$storytimeisland_dictionary = function(page, currentpos, currentsize){
 
   var $ = require('jquery');
+  var Emitter = require('emitter');
 
   function set_scale(elem, targetscale){
     elem.css({
@@ -106,6 +107,8 @@ window.$storytimeisland_dictionary = function(page, currentpos, currentsize){
       }
     }
 
+
+
     var popup = $('<div class="dictionarytab animatorquick">' + text + '</div>');
 
     popup.css({
@@ -123,10 +126,16 @@ window.$storytimeisland_dictionary = function(page, currentpos, currentsize){
     setTimeout(function(){
       removepopup(popup);
     }, 3000);
+
+    dictionary_handle.emit('sound', mp3);
   }
 
   dictionary_handle.reset = function(){
     $('.dictionarytab').remove();
+  }
+
+  for(var i in Emitter.prototype){
+    dictionary_handle[i] = Emitter.prototype[i];
   }
 
   return dictionary_handle;

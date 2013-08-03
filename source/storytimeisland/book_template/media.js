@@ -102,11 +102,21 @@ window.$storytimeisland_media = function(book, global_settings){
 
     var soundcounter = 0;
 
+    function success(){
+      // media has loaded
+    }
+
+    function media_error(e){
+      console.log('media error');
+      console.dir(e);
+    }
+
     function load_sound(soundsrc, nextsound){
       var theSound = null;
 
       if(media.is_android){
-        theSound = new Media('file:///android_asset/www/' + soundsrc + '.mp3');
+        var src = '/android_asset/www/' + soundsrc + '.mp3';
+        theSound = new Media(src, success, media_error);
       }
       else{
         theSound = new buzz.sound(soundsrc + '.mp3', {
@@ -159,6 +169,17 @@ window.$storytimeisland_media = function(book, global_settings){
     }
   }
 
+  media.playpagesounds = function(index){
+
+    var fx = this.sounds["audio/pagefx/page" + index];
+    fx.play();
+
+    if(global_settings.voice_audio){
+      var speech = this.sounds["audio/pagespeech/page" + index];
+      speech.play();
+    }
+  }
+
   media.playsound = function(name){
     var snd = this.sounds[name];
 
@@ -188,7 +209,11 @@ window.$storytimeisland_media = function(book, global_settings){
 
     for(var name in this.sounds){
       var snd = self.sounds[name];
+
       if(self.is_android){
+        console.log('-------------------------------------------');
+        console.log('stopping');
+        console.dir(snd);
         snd.seekTo(0);
         snd.stop();
         snd.release();

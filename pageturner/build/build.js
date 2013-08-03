@@ -196,11 +196,8 @@ require.relative = function(parent) {
   return localRequire;
 };
 require.register("component-indexof/index.js", function(exports, require, module){
-
-var indexOf = [].indexOf;
-
 module.exports = function(arr, obj){
-  if (indexOf) return arr.indexOf(obj);
+  if (arr.indexOf) return arr.indexOf(obj);
   for (var i = 0; i < arr.length; ++i) {
     if (arr[i] === obj) return i;
   }
@@ -10038,7 +10035,7 @@ var template = require('./templates/booktemplate.js');
 module.exports = PageTurner;
 
 var options_defaults = {
-  masksize:1,
+  masksize:5,
   animtime:1200,
   perspective:800
 }
@@ -10088,6 +10085,9 @@ PageTurner.prototype.render = function(){
     self.page_html.push($(this).html());
   })
 
+  console.log('-------------------------------------------');
+  console.dir(self.page_html);
+
   this.book.html(template);
 
   this.base = this.book.find('#base');
@@ -10095,16 +10095,14 @@ PageTurner.prototype.render = function(){
 
   setPerspective(this.leaves, this.options.perspective);
 
-  this.book.bind('resize', function(){
-    self.resize();
-  });
-
   this.resize();
   this.load_page(this.options.startpage || 0);
 
   var resizingID = null;
 
   $(window).resize(function(){
+    console.log('-------------------------------------------');
+    console.log('resize');
     if(resizingID){
       clearTimeout(resizingID);
     }
@@ -10139,19 +10137,27 @@ PageTurner.prototype.load_page = function(index){
   self.emit('load', index);
   this.currentpage = index;
 
-  this.baseleft = this.create_leaf('left', this.page_html[index-1]);
-  this.baseright = this.create_leaf('right', this.page_html[index+1]);
+  this.baseleft = this.create_leaf('left', (this.page_html[index-1] || '').replace(/>undefined</g, '><'));
+  this.baseright = this.create_leaf('right', (this.page_html[index+1] || '').replace(/>undefined</g, '><'));
 
   this.leafleft = this.create_double_leaf(this.page_html[index-1], this.page_html[index]);
   this.leafright = this.create_double_leaf(this.page_html[index], this.page_html[index+1]);
   
-  var existingbase = this.base.find('> div');
-  var existingleaves = this.leaves.find('> div');
+  var existingbase = this.base.find('.leaf');
+  var existingleaves = this.leaves.find('.leafholder');
 
-  this.baseright.hide();
-  this.baseleft.hide();
-  this.leafright.hide();
-  this.leafleft.hide();
+  this.baseright.css({
+    display:'block'
+  })
+  this.baseleft.css({
+    display:'block'
+  })
+  this.leafright.css({
+    display:'block'
+  })
+  this.leafleft.css({
+    display:'block'
+  })
 
   this.base.prepend(this.baseright).prepend(this.baseleft);
   this.leaves.prepend(this.leafright).prepend(this.leafleft);
@@ -10161,24 +10167,32 @@ PageTurner.prototype.load_page = function(index){
   self.processmask(this.baseleft, 1);
   self.processmask(this.baseright, 1);
 
-  this.leafleft.find('.leaf').each(function(){
+  this.leafleft.find('.leaf').each(function(i){
     self.processmask($(this));
   })
 
-  this.leafright.find('.leaf').each(function(){
+  this.leafright.find('.leaf').each(function(i){
     self.processmask($(this));
   })
 
   setTimeout(function(){
+
     existingbase.fadeOut(200, function(){
       existingbase.remove();
-    });
+    })
+
     existingleaves.fadeOut(200, function(){
       existingleaves.remove();
-    });
+    })
     
-    self.leafright.show();
-    self.leafleft.show();
+    
+    self.leafright.css({
+      display:'block'
+    })
+
+    self.leafleft.css({
+      display:'block'
+    })
 
     setTimeout(function(){
       self.active = true;
@@ -10192,7 +10206,7 @@ PageTurner.prototype.processmask = function(leaf, val){
 
   var usemask = arguments.length==2 ? val : 0;
 
-  var rect = leaf.data('side') == 'left' ? 
+  var rect = leaf.attr('data-side') == 'left' ? 
     'rect(0px, ' + ((size.width/2)+usemask) + 'px, ' + (size.height) + 'px, 0px)' :
     'rect(0px, ' + (size.width) + 'px, ' + (size.height) + 'px, ' + ((size.width/2)-usemask) + 'px)'
 
@@ -10211,7 +10225,7 @@ PageTurner.prototype.create_leaf = function(side, html, domask){
   if(this.options.apply_pageclass){
     leaf.find('.content').addClass(this.options.apply_pageclass);
   }
-  leaf.data('side', side);
+  leaf.attr('data-side', side);
   leaf.width(this.size.width).height(this.size.height);
   return leaf;
 }
@@ -10281,18 +10295,16 @@ PageTurner.prototype.animate_direction = function(direction){
   var base = this['base' + side];
   var otherbase = this['base' + otherside];
 
-  base.show();
+  base.css({
+    display:'block'
+  })
 
-  if(leaf.index()==0){
-    otherleaf.insertBefore(leaf);
-    otherbase.insertBefore(base);
-  }
+  otherleaf.insertBefore(leaf);
 
-/*
-  leaf.find('.leaf').each(function(){
+  leaf.find('.leaf').each(function(i){
     self.processmask($(this), self.options.masksize);  
   })
-*/
+
 
   setAnimationTime(leaf, self.options.animtime);
   setRotation(leaf, side=='left' ? 180 : 0);
@@ -10320,8 +10332,8 @@ PageTurner.prototype.animate_index = function(index){
 function setLeafTransform(elem){
   var el = elem.get(0);
 
-  var rotation = elem.data('rot') || 0;
-  var z = elem.data('z') || 0;
+  var rotation = elem._rot || 0;
+  var z = elem._z || 0;
 
   if (transform) {
     if (has3d) {
@@ -10348,12 +10360,12 @@ function setLeafTransform(elem){
 }
 
 function setZ(elem, amount){
-  elem.data('z', amount);
+  elem._z = amount;
   setLeafTransform(elem);
 }
 
 function setRotation(elem, amount){
-  elem.data('rot', amount);
+  elem._rot = amount;
   setLeafTransform(elem);
 }
 
@@ -10442,22 +10454,31 @@ PageFader.prototype.render = function(){
 
   this.allwrapper = this.book.find('#allwrapper');
   this.allwrapper.css({
-    position:'absolute'
+    position:'absolute',
+    overflow:'hidden'
   })
   this.pages = this.book.find('.pagewrapper');
   this.book.css({
     overflow:'hidden'
   })
   this.pages.css({
-    position:'absolute'
+    position:'absolute'    
   })
 
-  setAnimationTime(this.allwrapper, 1200);
+  this.pages.css({
+    display:'none'
+  })
+  this.pages.eq(0).css({
+    display:'block'
+  })
 
+  setAnimationTime(this.pages, 1200);
+
+  this.currentpage = 0;
   this.resize();
 
-  this.currentpage = this.options.startpage;
   this.emit('loaded', this.currentpage);
+
 
   var resizingID = null;
 
@@ -10495,11 +10516,20 @@ PageFader.prototype.animate_direction = function(dir){
     return;
   }
 
+  var currentelem = this.pages.eq(this.currentpage);
+  var nextelem = this.pages.eq(nextpage);
+  
   var offset = (-nextpage * (this.size.width));
 
-  this.allwrapper.css({
-    left:offset + 'px'
+  currentelem.css({
+    left:-(this.size.width) + 'px'
   })
+
+  setTimeout(function(){
+    currentelem.css({
+      display:'none'
+    })
+  }, this.options.animtime)
 
 /*
   var currentelem = this.pages.eq(this.currentpage);
@@ -11315,12 +11345,12 @@ require.alias("binocarlos-pageturner/index.js", "pageturner/index.js");
 require.alias("component-emitter/index.js", "binocarlos-pageturner/deps/emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
 
-require.alias("component-jquery/index.js", "binocarlos-pageturner/deps/jquery/index.js");
-
 require.alias("component-has-translate3d/index.js", "binocarlos-pageturner/deps/has-translate3d/index.js");
 require.alias("component-transform-property/index.js", "component-has-translate3d/deps/transform-property/index.js");
 
 require.alias("component-transform-property/index.js", "binocarlos-pageturner/deps/transform-property/index.js");
+
+require.alias("component-jquery/index.js", "binocarlos-pageturner/deps/jquery/index.js");
 
 require.alias("binocarlos-pageturner/index.js", "binocarlos-pageturner/index.js");
 

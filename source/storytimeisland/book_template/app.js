@@ -17,7 +17,7 @@ window.$storytimeisland_application = function(){
   var html = window.$storytimebook.pages.map(function(page, index){
 
     var no = index + 1;
-    var text = page.text.replace(/\n/g, "<br />");
+    var text = (page.text || '').replace(/\n/g, "<br />");
 
     var offset = page.extra_config.textoffset || {};
     var offsetleft = offset.x || 0;
@@ -75,7 +75,24 @@ window.$storytimeisland_application = function(){
   home_factory.on('loadbook', function(){
     media.stopsounds();
     activemodule.destroy();
-    show_book();
+    setTimeout(function(){
+      show_book();  
+    }, 10)
+    
+  })
+
+  book_factory.on('view:page', function(index){
+    media.playpagesounds(index);
+  })
+
+  book_factory.on('animate', function(){
+    console.log('-------------------------------------------');
+    console.log('stop sounds');
+    media.stopsounds();
+  })
+
+  book_factory.on('dictionary', function(mp3){
+    media.playdictionarysound(mp3);
   })
 
 
@@ -122,6 +139,12 @@ window.$storytimeisland_application = function(){
   }
 
   function show_book(){
+    $('#teddybutton').css({
+      display:'block'
+    });
+    $('#bookviewer').css({
+      display:'block'
+    });
     activemodule = book_factory();
   }
 

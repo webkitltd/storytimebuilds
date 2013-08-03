@@ -21,15 +21,19 @@
 </head>
 <body>
   
-  <div id="shadow"></div>
+  
   <div id="home">
 
   </div>
-  <div id="book">
-      
+  <div id="bookviewer">
+    <div id="shadow"></div>
+    <div id="book">
+        
+    </div>
+    <div class="arrow leftarrow"></div>
+    <div class="arrow rightarrow"></div>
   </div>
-  <div class="arrow leftarrow"></div>
-  <div class="arrow rightarrow"></div>
+  
   <div id="teddybutton">
     <img class="normal" src="img/cornertab.png" />
     <img class="highlight" src="img/cornertabactive.png" />
@@ -44,16 +48,16 @@
       </tr>
       <tr>
         <td width=50% align=right valign=top>
-          <div id="nobubblebutton" class="pointercursor">
+          <div id="nobubblebutton" class="pointercursor tapbutton">
             <img id="nobubbleimage" src="img/nobubble.png" /><br /><br />
             <div id="nobubbletab" class="homepagetab">grownup reads</div>
           </div>
         </td>
         <td align=center width=1>
-          <img id="frontpageimage" class="pointercursor boxshadow" src="icons/frontpage.png" />
+          <img id="frontpageimage" class="pointercursor boxshadow tapbutton" src="icons/frontpage.png" />
         </td>
         <td width=50% align=left valign=top>
-          <div id="bubblebutton" class="pointercursor">
+          <div id="bubblebutton" class="pointercursor tapbutton">
             <img id="bubbleimage" src="img/bubble.png" /><br /><br />
             <div id="bubbletab" class="homepagetab">reads itself</div>
           </div>
@@ -61,6 +65,30 @@
       </tr>
     </table>
     <div id="teddyholder"></div>
+  </script>
+
+  <script  id="gallerytemplate" type="text/template">
+    <div gallery id="gallery">
+    
+      <div class="gallerymask">
+        <div class="galleryimages" style="position:relative;">
+          <div ng-repeat="page in gallerypages" gallerypage="page">
+            <div class="gallerypage" ng-style="{background:'url(images/100/page' +  page.number + '.png)'}" hm-tap="loadpage(page.number);">
+            <div class="gallerybadge"><span class="badge badge-info">{{ page.index }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="galleryarrowleft" hm-tap="movegallery(-1);">
+          <img class="arrowimg" src="img/leftarrow.png" height=80 />
+      </div>
+    
+      <div class="galleryarrowright" hm-tap="movegallery(1);">
+          <img class="arrowimg" src="img/rightarrow.png" height=80 />
+      </div>
+
+    </div>
   </script>
 
   <script id="teddytemplate" type="text/template">
@@ -77,6 +105,7 @@
     window.$storytimebook = <%- JSON.stringify(document, null, 4) %>;
   </script>
   <script src="env.js"></script>
+
   <script src="buzz.js"></script>
   <script src="motio.js"></script>
   <script src="build/build.js"></script>
@@ -88,7 +117,7 @@
   <script src="home.js"></script>
   <script src="app.js"></script>
   <script>
-    var $ = require('jquery');
+    var $ = require('jquery')
 
     function onDeviceReady(){
       $(window.$storytimeisland_application);

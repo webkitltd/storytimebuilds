@@ -25,20 +25,6 @@ window.$storytimeisland_home = function(homeselector, templates, global_settings
       })
     }
 
-    $('#frontpageimage').click(function(){
-      homepage_factory.emit('loadbook');
-    })
-
-    $('#nobubblebutton').click(function(){
-      global_settings.voice_audio = false;
-      assign_audio_buttons();
-    })
-
-    $('#bubblebutton').click(function(){
-      global_settings.voice_audio = true;
-      assign_audio_buttons();
-    })
-
     assign_audio_buttons();
 
     currenteddy = window.$storytimeisland_teddy('#teddyholder', templates);
@@ -74,10 +60,36 @@ window.$storytimeisland_home = function(homeselector, templates, global_settings
       currenteddy.animate();
     }, 1);
 
+    var actions = {
+      frontpageimage:function(){
+        homepage_factory.emit('loadbook');
+      },
+      nobubblebutton:function(){
+        global_settings.voice_audio = false;
+        assign_audio_buttons();
+      },
+      bubblebutton:function(){
+        global_settings.voice_audio = true;
+        assign_audio_buttons();
+      }
+    }
+
     return {
       destroy:function(){
         $(homeselector).html('');
         currenteddy.destroy();    
+      },
+      ontap:function(ev){
+        var elem = ev.originalEvent.srcElement;
+        var button = $(elem).closest('.tapbutton');
+        if(button.length<=0){
+          return;
+        }
+        var fn = actions[button.attr('id')];
+        if(!fn){
+          return;
+        }
+        fn();
       }
     };
   }
