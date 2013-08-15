@@ -10058,11 +10058,6 @@ function PageTurner(options){
   this.options = options;
   this.is3d = options.has3d;
 
-  console.log('-------------------------------------------');
-  console.log('-------------------------------------------');
-  console.log('3d');
-  console.dir(this.is3d);
-
   this.page_html = [];
   this.currentpage = 0;
 
@@ -10181,7 +10176,7 @@ PageTurner.prototype.load_page = function(index){
     setRotation(this.leafright, 180);
 
     this.leafleft.find('.leaf').each(function(i){
-      self.processmask($(this));
+      self.processmask($(this), 1);
     })
 
     this.leafright.find('.leaf').each(function(i){
@@ -10222,9 +10217,10 @@ PageTurner.prototype.processmask = function(leaf, val){
 
   var usemask = arguments.length==2 ? val : 0;
 
+  // clip: rect(<top>, <right>, <bottom>, <left>);
   var rect = leaf.attr('data-side') == 'left' ? 
-    'rect(0px, ' + ((size.width/2)+usemask) + 'px, ' + (size.height) + 'px, 0px)' :
-    'rect(0px, ' + (size.width) + 'px, ' + (size.height) + 'px, ' + ((size.width/2)-usemask) + 'px)'
+    'rect(0px, ' + (Math.ceil(size.width/2)+usemask) + 'px, ' + (size.height) + 'px, 0px)' :
+    'rect(0px, ' + (size.width) + 'px, ' + (size.height) + 'px, ' + (Math.floor(size.width/2)-usemask) + 'px)'
 
   leaf.css({
     'clip':rect
@@ -10359,7 +10355,7 @@ PageTurner.prototype.animate_direction = function(direction, nextpage){
   otherleaf.insertBefore(leaf);
 
   leaf.find('.leaf').each(function(i){
-    self.processmask($(this), self.options.masksize);  
+    self.processmask($(this), self.options.masksize);
   })
 
 
@@ -11566,7 +11562,7 @@ module.exports = function storytimeisland_application(){
     gallery:$('#gallerytemplate').text().replace(/^\s+/, '')
   };
 
-  var book_factory = Book('#book', html, templates);
+  var book_factory = Book('#book', html, templates, window.$storytimebook);
   var home_factory = Home('#home', templates, global_settings);
   var media = Media(window.$storytimebook, global_settings);
 
@@ -11595,7 +11591,10 @@ module.exports = function storytimeisland_application(){
 
 
   book_factory.on('view:page', function(index){
-    media.playpagesounds(index);
+    setTimeout(function(){
+      media.playpagesounds(index);  
+    }, 300)
+    
   })
 
   book_factory.on('animate', function(){
@@ -11698,10 +11697,11 @@ var $ = require('jquery');
 var has3d = require('has-translate3d');
 var Emitter = require('emitter');
 var Dictionary = require('./dictionary');
+var TextHighlighter = require('./texthighlighter');
 var Gallery = require('./gallery');
 var PageTurner = require('pageturner');
 
-module.exports = function storytimeisland_book(bookselector, html, templates){
+module.exports = function storytimeisland_book(bookselector, html, templates, data){
 
   var is_3d = has3d;
 
@@ -11725,6 +11725,8 @@ module.exports = function storytimeisland_book(bookselector, html, templates){
   function book_factory(){
 
     var activedictionary = null;
+    var activehighlighter = null;
+
     var dragging = null;
     var animating = false;
     var loading = false;
@@ -11916,6 +11918,9 @@ module.exports = function storytimeisland_book(bookselector, html, templates){
       })
 
       activedictionary = Dictionary(get_page_data(index), currentpos, currentsize);
+      activehighlighter = TextHighlighter(html[index], data.config.highlighters ? data.config.highlighters[index] : []);
+      activehighlighter.start();
+      $('#book').append(activehighlighter.elem);
 
       activedictionary.on('sound', function(mp3){
         book_factory.emit('dictionary', mp3);
@@ -11937,6 +11942,10 @@ module.exports = function storytimeisland_book(bookselector, html, templates){
     book.on('animate', function(side){
       if(activedictionary){
         activedictionary.reset();
+      }
+
+      if(activehighlighter){
+        activehighlighter.reset();
       }
 
       if(book.currentpage==1 && side=='left'){
@@ -12057,7 +12066,7 @@ module.exports = function storytimeisland_book(bookselector, html, templates){
     }
 
     function get_page_data(forpage){
-      return window.$storytimebook.pages[arguments.length>0 ? forpage : book.currentpage];
+      return data.pages[arguments.length>0 ? forpage : book.currentpage];
     }
 
     book.render();
@@ -12224,6 +12233,106 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
 }
 
 
+});
+require.register("storytimeislandbook/texthighlighter.js", function(exports, require, module){
+// this is the stub
+
+/*
+
+  an overlay of the text on a page that highlights as the text is being read
+  
+*/
+var $ = require('jquery');
+var Emitter = require('emitter');
+
+module.exports = function storytimeisland_texthighlighter(html, timings){
+
+  $('.text_highlighter').remove();
+
+  var $elem = $(html);
+
+  $elem.addClass('text_highlighter');
+  $elem.show();
+  $elem.css({
+    position:'absolute',
+    left:'0px',
+    top:'0px',
+    width:'100%',
+    height:'100%'
+  })
+
+  $elem.find('.pagebg').css({
+    'background':'url()'
+  })
+
+  var text = $elem.find('.pagetext').html().replace(/<br>/g, "\n");
+
+  text = text.replace(/([\w\.'"-]+)/g, function(match, word){
+    return '<span class="highlightspan">' + word + '</span>';
+  }).replace(/\n/g, '<br>');
+
+  $elem.find('.pagetext').html(text);
+
+  var highlightspans = $elem.find('.highlightspan');
+
+  highlightspans.css({
+    color:'red',
+    opacity:0
+  })
+
+  var highlighter = {};
+  highlighter.elem = $elem;
+
+  for(var i in Emitter.prototype){
+    highlighter[i] = Emitter.prototype[i];
+  }
+
+  highlighter.reset = function(){
+    clearTimeout(this.timeoutid);
+    $elem.remove();
+  }
+
+  highlighter.start = function(){
+    var currentindex = 0;
+
+    console.log('-------------------------------------------');
+    console.log('-------------------------------------------');
+    console.log('starting');
+    console.dir(timings);
+
+    function runhighlight(index){
+      var timing = timings[index+1];
+      
+      if(!timing){
+        return;
+      }
+
+      var gap = timing - timings[index];
+
+      highlightspans.eq(index).css({
+        opacity:1
+      })
+        
+      setTimeout(function(){
+        highlightspans.eq(index).addClass('animator').css({
+          opacity:0
+        })
+      }, 1000)
+
+      setTimeout(function(){
+        runhighlight(index+1);
+      }, gap)
+      
+    }
+
+    setTimeout(function(){
+      runhighlight(0);
+    }, timings[0]);
+  }
+
+  return highlighter;
+
+}
 });
 require.register("storytimeislandbook/gallery.js", function(exports, require, module){
 // this is the stub
@@ -12622,6 +12731,10 @@ module.exports = function storytimeisland_media(book, global_settings){
     sounds:{},
     playing:{},
     playspeech:true
+  }
+
+  function exitFromApp(){
+    media.stopsounds();
   }
 
   if(platform.is_phonegap){

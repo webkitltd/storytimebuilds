@@ -307,14 +307,15 @@ program
   })
 
 program
-  .command('createandroid [appname] [packagename]')
+  .command('createandroid [appname] [apptitle] [packagename]')
   .description('create the android stub folder for an app')
-  .action(function(appname, packagename){
+  .action(function(appname, apptitle, packagename){
 
     process.env.NODE_ENV = 'development';
 
     var settings = {
       appname:appname,
+      apptitle:apptitle,
       packagename:packagename
     }
 
@@ -347,6 +348,7 @@ program
       'build.xml',
       'AndroidManifest.xml',
       '.project',
+      'res/xml/config.xml',
       'res/values/strings.xml',
       'res/layout/main.xml'
     ]

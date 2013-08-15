@@ -20,6 +20,7 @@
     "app.js",
     "book.js",
     "dictionary.js",
+    "texthighlighter.js",
     "gallery.js",
     "home.js",
     "media.js",

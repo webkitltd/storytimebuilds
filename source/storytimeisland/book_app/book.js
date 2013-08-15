@@ -4,10 +4,11 @@ var $ = require('jquery');
 var has3d = require('has-translate3d');
 var Emitter = require('emitter');
 var Dictionary = require('./dictionary');
+var TextHighlighter = require('./texthighlighter');
 var Gallery = require('./gallery');
 var PageTurner = require('pageturner');
 
-module.exports = function storytimeisland_book(bookselector, html, templates){
+module.exports = function storytimeisland_book(bookselector, html, templates, data){
 
   var is_3d = has3d;
 
@@ -31,6 +32,8 @@ module.exports = function storytimeisland_book(bookselector, html, templates){
   function book_factory(){
 
     var activedictionary = null;
+    var activehighlighter = null;
+
     var dragging = null;
     var animating = false;
     var loading = false;
@@ -222,6 +225,9 @@ module.exports = function storytimeisland_book(bookselector, html, templates){
       })
 
       activedictionary = Dictionary(get_page_data(index), currentpos, currentsize);
+      activehighlighter = TextHighlighter(html[index], data.config.highlighters ? data.config.highlighters[index] : []);
+      activehighlighter.start();
+      $('#book').append(activehighlighter.elem);
 
       activedictionary.on('sound', function(mp3){
         book_factory.emit('dictionary', mp3);
@@ -243,6 +249,10 @@ module.exports = function storytimeisland_book(bookselector, html, templates){
     book.on('animate', function(side){
       if(activedictionary){
         activedictionary.reset();
+      }
+
+      if(activehighlighter){
+        activehighlighter.reset();
       }
 
       if(book.currentpage==1 && side=='left'){
@@ -363,7 +373,7 @@ module.exports = function storytimeisland_book(bookselector, html, templates){
     }
 
     function get_page_data(forpage){
-      return window.$storytimebook.pages[arguments.length>0 ? forpage : book.currentpage];
+      return data.pages[arguments.length>0 ? forpage : book.currentpage];
     }
 
     book.render();

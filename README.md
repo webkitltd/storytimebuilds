@@ -110,10 +110,10 @@ To see the book working.
 This step allows you to create a new android application for the HTML book.
 
 	// create a storytimeisland android
-	node bin\book.js createandroid Freddy com.storytimeisland.freddy
+	node bin\book.js createandroid Freddy "Freddy The Fisherman" com.storytimeisland.freddy
 
 	// create an iboard android
-	node bin\book.js createandroid Monsters com.iboard.monsters
+	node bin\book.js createandroid Monsters "Monsters" com.iboard.monsters
 
 NOTE - the domain name part MUST have the book name on the end - it is the ID for the android app
 

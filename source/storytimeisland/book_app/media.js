@@ -18,6 +18,10 @@ module.exports = function storytimeisland_media(book, global_settings){
     playspeech:true
   }
 
+  function exitFromApp(){
+    media.stopsounds();
+  }
+
   if(platform.is_phonegap){
 
     document.addEventListener("backbutton", exitFromApp, false);

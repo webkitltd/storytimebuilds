@@ -60,7 +60,7 @@ module.exports = function storytimeisland_application(){
     gallery:$('#gallerytemplate').text().replace(/^\s+/, '')
   };
 
-  var book_factory = Book('#book', html, templates);
+  var book_factory = Book('#book', html, templates, window.$storytimebook);
   var home_factory = Home('#home', templates, global_settings);
   var media = Media(window.$storytimebook, global_settings);
 
@@ -89,7 +89,10 @@ module.exports = function storytimeisland_application(){
 
 
   book_factory.on('view:page', function(index){
-    media.playpagesounds(index);
+    setTimeout(function(){
+      media.playpagesounds(index);  
+    }, 300)
+    
   })
 
   book_factory.on('animate', function(){
