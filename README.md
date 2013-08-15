@@ -72,10 +72,8 @@ iboard books are in HTML (again, more later).
 
 Once the book itself has been prepared we get into the world of the build script - this is roughly the same for each provider.
 
-#### step 2 - convert the source book into RAW format
-Our RAW format comprises of the index.html and the images for the book but not any of the code needed to run it.
-
-The scripts to convert a book into RAW format (on Mac \ = /)
+#### step 2 - convert the source book into HTML format
+The scripts to convert a book into HTML format (on Mac \ = /)
 
 **Storytimeisland:**
 
@@ -93,24 +91,7 @@ So in the case of storytime freddy:
 
 	/raw_books/storytimeisland/freddy
 
-#### step 3 - convert the RAW book into HTML
-This step merges together the RAW book with our generic page turning code to produce a working HTML site for the book.
-
-This step is the same for each provider.
-
-	// convert a storytimeisland RAW book to HTML
-	node bin\book.js raw storytimeisland\freddy
-
-	// convert an iboard RAW book to HTML
-	node bin\book.js raw iboard\monsters
-
-This step creates a new folder: **/html_books/[provider]/[bookname]**
-
-So in the case of storytime freddy:
-
-	/html_books/storytimeisland/freddy
-
-#### step 4 - view the book
+#### step 3 - view the book
 This step allows you to see the output of the HTML book in a browser.
 
 	// view a storytimeisland book
@@ -125,7 +106,7 @@ You can then open a browser and type:
 
 To see the book working.
 
-#### step 5 - create android application
+#### step 4 - create android application
 This step allows you to create a new android application for the HTML book.
 
 	// create a storytimeisland android
@@ -136,7 +117,7 @@ This step allows you to create a new android application for the HTML book.
 
 NOTE - the domain name part MUST have the book name on the end - it is the ID for the android app
 
-#### step 6 - inject the HTML into the android application
+#### step 5 - inject the HTML into the android application
 This step can be repeated without repeating step 5 each time.
 
 It adds our HTML book to the android application - if we change rebuild the HTML book we can skip step 5 meaning we will not replace the entire android just the content.
@@ -147,7 +128,7 @@ It adds our HTML book to the android application - if we change rebuild the HTML
 	// inject HTML into an iboard app
 	node bin\book.js android iboard/monsters Monsters
 
-#### step 7 - building the .apk
+#### step 6 - building the .apk
 This step must be done within Android Development Tools.
 
 Open ADT (Android Development Tools).

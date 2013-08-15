@@ -11,10 +11,10 @@
   you pass it the data for the page that is active
   
 */
-window.$storytimeisland_teddy = function(selector, templates){
+var $ = require('jquery');
+var Emitter = require('emitter');
 
-  var $ = require('jquery');
-  var Emitter = require('emitter');
+module.exports = function storytimeisland_teddy(selector, templates){
 
   var $elem = $(selector);
 
@@ -130,13 +130,14 @@ window.$storytimeisland_teddy = function(selector, templates){
         function(next){
           set_arm(1);
           self.emit('teddybutton', true);
+          self.emit('flicker');
           timeoutids.animate = setTimeout(next, 3000);
         },
 
-        function(next){          
+        function(next){
           set_arm(0);
+          self.emit('finished');
           set_speaking(false);
-          self.emit('flicker');
           next();
         }
       ]

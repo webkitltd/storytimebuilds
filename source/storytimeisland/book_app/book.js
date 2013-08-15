@@ -1,10 +1,13 @@
 // this is the stub
 
-window.$storytimeisland_book = function(bookselector, html){
+var $ = require('jquery');
+var has3d = require('has-translate3d');
+var Emitter = require('emitter');
+var Dictionary = require('./dictionary');
+var Gallery = require('./gallery');
+var PageTurner = require('pageturner');
 
-  var $ = require('jquery');
-  var has3d = require('has-translate3d');
-  var Emitter = require('emitter');
+module.exports = function storytimeisland_book(bookselector, html, templates){
 
   var is_3d = has3d;
 
@@ -27,7 +30,6 @@ window.$storytimeisland_book = function(bookselector, html){
 
   function book_factory(){
 
-    var book;
     var activedictionary = null;
     var dragging = null;
     var animating = false;
@@ -35,18 +37,22 @@ window.$storytimeisland_book = function(bookselector, html){
     var currentsize = {};
     var currentpos = {};
 
+    var gallery = Gallery(templates.gallery);
+
     $(bookselector).html(html.join("\n"));
 
     var pagecount = $('.page').length;
-    if(is_3d){
-      var PageTurner = require('pageturner')
-      book = new PageTurner({
-        bookselector:bookselector,
-        pageselector:'.page',
-        apply_pageclass:'bookpage',
-        startpage:startpage,
-        perspective:950
-      })
+    
+    var book = new PageTurner({
+      has3d:is_3d,
+      bookselector:bookselector,
+      pageselector:'.page',
+      apply_pageclass:'bookpage',
+      startpage:startpage,
+      perspective:950
+    })
+
+      /*
     }
     else{
       var PageFader = require('pagefader');
@@ -57,6 +63,7 @@ window.$storytimeisland_book = function(bookselector, html){
         startpage:startpage
       })
     }
+    */
     
     var bookelem = $(bookselector);
 
@@ -93,6 +100,51 @@ window.$storytimeisland_book = function(bookselector, html){
       else{
         book.animate_direction(arrow.hasClass('leftarrow') ? -1 : 1);
       }
+    }
+
+    function open_gallery(){
+      $('#gallery').css({
+        top:'0px'
+      })
+      setTimeout(function(){
+        gallery.active = true;
+        $('#homebutton').show();
+        $('#teddybutton .normal').hide();
+        $('#teddybutton .highlight').show();
+      }, 10)
+      
+      
+    }
+
+    function close_gallery(){
+      $('#gallery').css({
+        top:'-120px'
+      })
+      setTimeout(function(){
+        gallery.active = false;
+        $('#homebutton').hide();
+        $('#teddybutton .normal').show();
+        $('#teddybutton .highlight').hide();
+      }, 10)
+      
+      
+    }
+
+    function clickteddy(){
+      if(gallery.active){
+        close_gallery();
+      }
+      else{
+        open_gallery(); 
+      }
+    }
+
+    function clickhome(){
+      close_gallery();
+      setTimeout(function(){
+        book_factory.emit('gohome');  
+      },500)
+      
     }
 
 
@@ -169,7 +221,7 @@ window.$storytimeisland_book = function(bookselector, html){
         display:'block'
       })
 
-      activedictionary = window.$storytimeisland_dictionary(get_page_data(index), currentpos, currentsize);
+      activedictionary = Dictionary(get_page_data(index), currentpos, currentsize);
 
       activedictionary.on('sound', function(mp3){
         book_factory.emit('dictionary', mp3);
@@ -183,7 +235,7 @@ window.$storytimeisland_book = function(bookselector, html){
         book_factory.emit('view:page', index);
       }
 
-      
+      gallery.set_current_page(index);
 
       
     })
@@ -217,6 +269,11 @@ window.$storytimeisland_book = function(bookselector, html){
       //apply_shadow(side);
     })
 
+    gallery.on('loadpage', function(index){
+      close_gallery();
+      book.animate_index(index);
+    })
+
     book.ondragstart = function(ev){
       dragging = true;
     }
@@ -227,14 +284,20 @@ window.$storytimeisland_book = function(bookselector, html){
       }
 
       if(ev.distance>=15){
-        if(animating || loading){
-          book.triggernext = function(){
-            book.animate_direction(ev.direction=='left' ? 1 : -1);
-          }
-          return;
+        if(gallery.active){
+          gallery.animate(ev.direction=='left' ? 1 : -1);
         }
+        else{
+          if(animating || loading){
+            book.triggernext = function(){
+              book.animate_direction(ev.direction=='left' ? 1 : -1);
+            }
+            return;
+          }
+          book.animate_direction(ev.direction=='left' ? 1 : -1);    
+        }
+
         dragging = false;
-        book.animate_direction(ev.direction=='left' ? 1 : -1);  
       }
 
     }
@@ -243,8 +306,34 @@ window.$storytimeisland_book = function(bookselector, html){
       dragging = false;
     }
 
+    book.onswipe = function(ev){
+      if(gallery.active && ev.direction=='up'){
+        close_gallery();
+        return;
+      }
+    }
+
     book.ontap = function(ev){
       var elem = ev.originalEvent.srcElement;
+
+      var teddy = $(elem).closest('#teddybutton');
+
+      if(teddy.length>0){
+        clickteddy();
+        return;
+      }
+
+      var home = $(elem).closest('#homebutton');
+
+      if(home.length>0){
+        clickhome();
+        return;
+      }
+
+      if(gallery.active){
+        gallery.tap(ev);
+        return;
+      }
 
       if($(elem).hasClass('arrow')){
         taparrow($(elem));
@@ -281,20 +370,16 @@ window.$storytimeisland_book = function(bookselector, html){
 
     book.destroy = function(){
       $(bookselector).html('');
+      gallery.destroy();
     }
-
 
     return book;
   }
-
-
 
   for(var i in Emitter.prototype){
     book_factory[i] = Emitter.prototype[i];
   }
 
-
   return book_factory;
-
 }
 

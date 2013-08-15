@@ -19,8 +19,6 @@ var BookData = require('../lib/bookdata');
 var BookTemplate = require('../lib/booktemplate');
 var ImageProcessor = require('../lib/imageprocessor');
 
-log.info('starting');
-
 program
   .version(version)
 
@@ -37,7 +35,7 @@ function run_commands(commands, done){
     exec(cmd, function(error, result){
       console.log(result);
       setTimeout(function(){
-        nextcmd();  
+        nextcmd();
       }, 200)
       
     })
@@ -53,7 +51,6 @@ program
 
     var commands = [
       provider + ' ' + book + (quickmode ? ' ' + quickmode : ''),
-      'raw ' + provider + '/' + book,
       'serve ' + provider + '/' + book
     ]
 
@@ -75,8 +72,7 @@ program
     var appname = (book.replace(/^(\w)/, function(c){return c.toUpperCase();}));
 
     var commands = [
-      provider + ' ' + book,
-      'raw ' + provider + '/' + book
+      provider + ' ' + book
     ];
 
     if(create=='yes'){
@@ -103,10 +99,7 @@ program
     var commands = [
       'storytimeisland freddy',
       'storytimeisland frank',
-      'iboard monsters',
-      'raw storytimeisland/freddy',
-      'raw storytimeisland/frank',
-      'raw iboard/monsters'
+      'iboard monsters'
     ]
 
     run_commands(commands, function(){
@@ -147,8 +140,7 @@ program
   .action(function(name, mode){
     
     var inputfolder = path.normalize(__dirname + '/../source/storytimeisland/' + name);
-    var outputfolder = path.normalize(__dirname + '/../raw_books/storytimeisland/' + name);
-    var outputfolder2 = path.normalize(__dirname + '/../html_books/storytimeisland/' + name);
+    var outputfolder = path.normalize(__dirname + '/../html_books/storytimeisland/' + name);
 
     var data = new BookData(name, inputfolder);
 
@@ -157,7 +149,6 @@ program
 
       var html = template.render();
       fs.writeFileSync(outputfolder + '/index.html', html, 'utf8');
-      fs.writeFileSync(outputfolder2 + '/index.html', html, 'utf8');
 
 
     })
@@ -196,23 +187,29 @@ program
 
 program
   .command('storytimeisland [name]')
-  .description('convert a storytimeisland book to raw output')
+  .description('convert a storytimeisland book to html output')
   .action(function(name, quickmode){
 
     process.env.NODE_ENV = 'development';
 
     var inputfolder = path.normalize(__dirname + '/../source/storytimeisland/' + name);
-    var outputfolder = path.normalize(__dirname + '/../raw_books/storytimeisland/' + name);
+    var outputfolder = path.normalize(__dirname + '/../html_books/storytimeisland/' + name);
 
     var template_folder = path.normalize(__dirname + '/../source/storytimeisland/book_template');
+    var app_template_folder = path.normalize(__dirname + '/../source/storytimeisland/book_app');
+    var assets_folder = path.normalize(__dirname + '/../source/storytimeisland/book_assets');
 
     if(!fs.existsSync(inputfolder)){
       throw new Error('folder missing: ' + dye.yellow(inputfolder));      
     }
 
     wrench.rmdirSyncRecursive(outputfolder, true);
-    wrench.mkdirSyncRecursive(__dirname + '/../raw_books/storytimeisland', true);
+    wrench.mkdirSyncRecursive(__dirname + '/../html_books/storytimeisland', true);
+
     wrench.copyDirSyncRecursive(template_folder, outputfolder);
+
+    wrench.copyDirSyncRecursive(app_template_folder + '/build', outputfolder + '/build');
+    wrench.copyDirSyncRecursive(assets_folder, outputfolder + '/build/storytimeislandbook');
 
     if(fs.existsSync(inputfolder + '/audio')){
       wrench.copyDirSyncRecursive(inputfolder + '/audio', outputfolder + '/audio');
@@ -246,13 +243,13 @@ program
 
 program
   .command('iboard [name]')
-  .description('convert an iboard book to raw output')
+  .description('convert an iboard book to html output')
   .action(function(name, mode){
 
     process.env.NODE_ENV = 'development';
 
     var inputfolder = path.normalize(__dirname + '/../source/iboard/' + name);
-    var outputfolder = path.normalize(__dirname + '/../raw_books/iboard/' + name);
+    var outputfolder = path.normalize(__dirname + '/../html_books/iboard/' + name);
 
     var template_folder = path.normalize(__dirname + '/../source/iboard/book_template');
 
@@ -261,7 +258,7 @@ program
     }
 
     wrench.rmdirSyncRecursive(outputfolder, true);
-    wrench.mkdirSyncRecursive(__dirname + '/../raw_books/iboard');
+    wrench.mkdirSyncRecursive(__dirname + '/../html_books/iboard');
     wrench.copyDirSyncRecursive(inputfolder, outputfolder);
 
     var templatefiles = fs.readdirSync(template_folder);
@@ -274,30 +271,6 @@ program
     console.log('done');
   })
 
-program
-  .command('raw [name]')
-  .description('convert the raw output to html output')
-  .action(function(name, mode){
-
-    process.env.NODE_ENV = 'development';
-
-    var inputfolder = path.normalize(__dirname + '/../raw_books/' + name);
-    var outputfolder = path.normalize(__dirname + '/../html_books/' + name);
-
-    var core_folder = path.normalize(__dirname + '/../pageturner/build');
-
-    if(!fs.existsSync(inputfolder)){
-      throw new Error('folder missing: ' + dye.yellow(inputfolder));      
-    }
-
-    wrench.mkdirSyncRecursive(outputfolder);
-    wrench.rmdirSyncRecursive(outputfolder, true);
-    wrench.copyDirSyncRecursive(inputfolder, outputfolder);
-
-
-    wrench.copyDirSyncRecursive(core_folder, outputfolder + '/build');
-    
-  })
 
 program
   .command('android [htmlname] [androidname]')

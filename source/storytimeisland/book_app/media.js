@@ -4,17 +4,26 @@
   
 */
 
-window.$storytimeisland_media = function(book, global_settings){
+var Emitter = require('emitter');
+var Platform = require('./platform');
 
-  var Emitter = require('emitter');
+module.exports = function storytimeisland_media(book, global_settings){
 
-  var platform = window.$storytimeisland_platform();
+  var platform = Platform();
 
   var media = {
     is_android:platform.is_android,
     sounds:{},
     playing:{},
     playspeech:true
+  }
+
+  if(platform.is_phonegap){
+
+    document.addEventListener("backbutton", exitFromApp, false);
+    document.addEventListener("pause", exitFromApp, false);
+    document.addEventListener("menubutton", exitFromApp, false);
+
   }
 
   /*
@@ -172,6 +181,10 @@ window.$storytimeisland_media = function(book, global_settings){
   media.playpagesounds = function(index){
 
     var fx = this.sounds["audio/pagefx/page" + index];
+    if(!fx){
+      return;
+    }
+    
     fx.play();
 
     if(global_settings.voice_audio){
@@ -211,9 +224,6 @@ window.$storytimeisland_media = function(book, global_settings){
       var snd = self.sounds[name];
 
       if(self.is_android){
-        console.log('-------------------------------------------');
-        console.log('stopping');
-        console.dir(snd);
         snd.seekTo(0);
         snd.stop();
         snd.release();

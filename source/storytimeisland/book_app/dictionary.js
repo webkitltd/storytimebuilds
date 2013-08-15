@@ -11,10 +11,10 @@
   you pass it the data for the page that is active
   
 */
-window.$storytimeisland_dictionary = function(page, currentpos, currentsize){
+var $ = require('jquery');
+var Emitter = require('emitter');
 
-  var $ = require('jquery');
-  var Emitter = require('emitter');
+module.exports = function storytimeisland_dictionary(page, currentpos, currentsize){
 
   function set_scale(elem, targetscale){
     elem.css({

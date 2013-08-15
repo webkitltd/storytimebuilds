@@ -2,7 +2,6 @@
 <head>
   <title><%= document.config.title %></title>
   <link rel="stylesheet" type="text/css" href="build/build.css">
-  <link rel="stylesheet" type="text/css" href="book.css">
   <style type="text/css">
 
 <% 
@@ -34,31 +33,35 @@
     <div class="arrow rightarrow"></div>
   </div>
   
+  <div id="homebutton">
+    <img src="build/storytimeislandbook/img/home.png" />
+  </div>
+
   <div id="teddybutton">
-    <img class="normal" src="img/cornertab.png" />
-    <img class="highlight" src="img/cornertabactive.png" />
+    <img class="normal" src="build/storytimeislandbook/img/cornertab.png" />
+    <img class="highlight" src="build/storytimeislandbook/img/cornertabactive.png" />
   </div>
   
   <script id="homepagetemplate" type="text/template">
     <table width="100%">
       <tr>
         <td colspan=3 align=center height=1>
-          <img id="logoimage" src="img/logo.png" />
+          <img id="logoimage" src="build/storytimeislandbook/img/logo.png" />
         </td>
       </tr>
       <tr>
         <td width=50% align=right valign=top>
           <div id="nobubblebutton" class="pointercursor tapbutton">
-            <img id="nobubbleimage" src="img/nobubble.png" /><br /><br />
+            <img id="nobubbleimage" src="build/storytimeislandbook/img/nobubble.png" /><br /><br />
             <div id="nobubbletab" class="homepagetab">grownup reads</div>
           </div>
         </td>
-        <td align=center width=1>
+        <td align=center width=1 id="booktd" style="padding-top:0px;">
           <img id="frontpageimage" class="pointercursor boxshadow tapbutton" src="icons/frontpage.png" />
         </td>
         <td width=50% align=left valign=top>
           <div id="bubblebutton" class="pointercursor tapbutton">
-            <img id="bubbleimage" src="img/bubble.png" /><br /><br />
+            <img id="bubbleimage" src="build/storytimeislandbook/img/bubble.png" /><br /><br />
             <div id="bubbletab" class="homepagetab">reads itself</div>
           </div>
         </td>
@@ -67,25 +70,33 @@
     <div id="teddyholder"></div>
   </script>
 
-  <script  id="gallerytemplate" type="text/template">
-    <div gallery id="gallery">
+  <script id="gallerytemplate" type="text/template">
+    <div id="gallery" class="quickanimator">
     
       <div class="gallerymask">
-        <div class="galleryimages" style="position:relative;">
-          <div ng-repeat="page in gallerypages" gallerypage="page">
-            <div class="gallerypage" ng-style="{background:'url(images/100/page' +  page.number + '.png)'}" hm-tap="loadpage(page.number);">
-            <div class="gallerybadge"><span class="badge badge-info">{{ page.index }}</span></div>
+        <div class="galleryimages quickanimator" style="position:relative;width:<%- document.pages.length * (112) %>px;">
+<% 
+  for(var i=0; i<document.pages.length; i++){
+    var no = i+1;
+    var page = document.pages[i];
+
+%>
+          <div>
+            <div class="gallerypage" data-gallery-index="<%- i %>" style="background:url(images/page<%- page.number %>.thumb.png)">
+              <div class="gallerybadge"><span class="badge badge-info"><%- i %></span></div>
             </div>
           </div>
+<% } %>
+
         </div>
       </div>
 
-      <div class="galleryarrowleft" hm-tap="movegallery(-1);">
-          <img class="arrowimg" src="img/leftarrow.png" height=80 />
+      <div class="galleryarrowleft">
+          <img class="arrowimg" data-direction="-1" src="build/storytimeislandbook/img/leftarrow.png" height=80 />
       </div>
     
-      <div class="galleryarrowright" hm-tap="movegallery(1);">
-          <img class="arrowimg" src="img/rightarrow.png" height=80 />
+      <div class="galleryarrowright">
+          <img class="arrowimg" data-direction="1" src="build/storytimeislandbook/img/rightarrow.png" height=80 />
       </div>
 
     </div>
@@ -105,22 +116,16 @@
     window.$storytimebook = <%- JSON.stringify(document, null, 4) %>;
   </script>
   <script src="env.js"></script>
-
-  <script src="buzz.js"></script>
-  <script src="motio.js"></script>
+  <script src="vendor/buzz.js"></script>
+  <script src="vendor/motio.js"></script>
   <script src="build/build.js"></script>
-  <script src="platform.js"></script>
-  <script src="media.js"></script>
-  <script src="dictionary.js"></script>
-  <script src="teddy.js"></script>
-  <script src="book.js"></script>
-  <script src="home.js"></script>
-  <script src="app.js"></script>
+  
   <script>
-    var $ = require('jquery')
+    var $ = require('jquery');
+    var app = require('storytimeislandbook/app');
 
     function onDeviceReady(){
-      $(window.$storytimeisland_application);
+      $(app);
     }
 
     if(window.$phonegap){

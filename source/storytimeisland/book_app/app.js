@@ -1,9 +1,13 @@
 // this is the stub
 
-window.$storytimeisland_application = function(){
+var $ = require('jquery');
+var Hammer = require('hammer');
+var Book = require('./book');
+var Home = require('./home');
+var Media = require('./media');
+var gesture = require('gesture');
 
-  var $ = require('jquery');
-  var Hammer = require('hammer');
+module.exports = function storytimeisland_application(){
 
   document.ontouchmove = function(event){
     event.preventDefault();
@@ -51,13 +55,14 @@ window.$storytimeisland_application = function(){
   };
 
   var templates = {
-    homepage:$('#homepagetemplate').text(),
-    teddy:$('#teddytemplate').text()
+    homepage:$('#homepagetemplate').text().replace(/^\s+/, ''),
+    teddy:$('#teddytemplate').text().replace(/^\s+/, ''),
+    gallery:$('#gallerytemplate').text().replace(/^\s+/, '')
   };
 
-  var book_factory = window.$storytimeisland_book('#book', html);
-  var home_factory = window.$storytimeisland_home('#home', templates, global_settings);
-  var media = window.$storytimeisland_media(window.$storytimebook, global_settings);
+  var book_factory = Book('#book', html, templates);
+  var home_factory = Home('#home', templates, global_settings);
+  var media = Media(window.$storytimebook, global_settings);
 
   media.on('loaded:all', function(){
     show_home();
@@ -81,18 +86,26 @@ window.$storytimeisland_application = function(){
     
   })
 
+
+
   book_factory.on('view:page', function(index){
     media.playpagesounds(index);
   })
 
   book_factory.on('animate', function(){
-    console.log('-------------------------------------------');
-    console.log('stop sounds');
     media.stopsounds();
   })
 
   book_factory.on('dictionary', function(mp3){
     media.playdictionarysound(mp3);
+  })
+
+  book_factory.on('gohome', function(mp3){
+    media.stopsounds();
+    activemodule.destroy();
+    setTimeout(function(){
+      show_home();  
+    }, 10)
   })
 
 
@@ -131,10 +144,22 @@ window.$storytimeisland_application = function(){
     }
   }
 
+  hammertime.onswipe = function(ev){
+    if(activemodule && activemodule.onswipe){
+      activemodule.onswipe(ev);
+    }
+  }
+
 
 
 
   function show_home(){
+    $('#teddybutton').css({
+      display:'none'
+    });
+    $('#bookviewer').css({
+      display:'none'
+    });
     activemodule = home_factory();
   }
 
@@ -153,12 +178,8 @@ window.$storytimeisland_application = function(){
       sounds:['audio/teddy/all']
     })
   }
-  
 
   setTimeout(load_all, 100);
-
-
-
 
 }
 

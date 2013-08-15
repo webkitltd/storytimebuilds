@@ -1,8 +1,9 @@
 // this is the stub
 
-window.$storytimeisland_platform = function(){
+var has3d = require('has-translate3d');
 
-  var has3d = require('has-translate3d');
+module.exports = function storytimeisland_platform(){
+  
   var is_3d = has3d;
   var is_phonegap = false;
   var is_android = false;

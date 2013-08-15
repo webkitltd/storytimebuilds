@@ -1,9 +1,10 @@
 // this is the stub
 
-window.$storytimeisland_home = function(homeselector, templates, global_settings){
+var $ = require('jquery');
+var Emitter = require('emitter');
+var Teddy = require('./teddy');
 
-  var $ = require('jquery');
-  var Emitter = require('emitter');
+module.exports = function storytimeisland_home(homeselector, templates, global_settings){
 
   var currenteddy = null;
 
@@ -27,7 +28,7 @@ window.$storytimeisland_home = function(homeselector, templates, global_settings
 
     assign_audio_buttons();
 
-    currenteddy = window.$storytimeisland_teddy('#teddyholder', templates);
+    currenteddy = Teddy('#teddyholder', templates);
 
     currenteddy.on('speak', function(){
       homepage_factory.emit('teddysound');
@@ -52,8 +53,48 @@ window.$storytimeisland_home = function(homeselector, templates, global_settings
       $('#teddybutton').show();
     })
 
-    currenteddy.on('flicker', function(mode){
+    currenteddy.on('finished', function(){
 
+      var mode = false;
+      var counter = 0;
+      function run_flicker(){
+        mode = !mode;
+        counter++;
+        if(counter>=11){
+          return;
+        }
+
+        $('#booktd').css({
+          'padding-top':(mode ? 10 : 0) + 'px'
+        })
+        
+        setTimeout(run_flicker, 100);
+      }
+
+      run_flicker();
+    })    
+
+    currenteddy.on('flicker', function(){
+      var mode = false;
+      var counter = 0;
+      function run_flicker(){
+        mode = !mode;
+        counter++;
+        if(counter>=7){
+          return;
+        }
+        if(mode){
+          $('#teddybutton .normal').hide();
+          $('#teddybutton .highlight').show();
+        }
+        else{
+          $('#teddybutton .normal').show();
+          $('#teddybutton .highlight').hide();
+        }
+        setTimeout(run_flicker, 500);
+      }
+
+      run_flicker();
     })
 
     setTimeout(function(){
