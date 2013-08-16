@@ -11567,7 +11567,14 @@ module.exports = function storytimeisland_application(){
   var media = Media(window.$storytimebook, global_settings);
 
   media.on('loaded:all', function(){
-    show_home();
+
+    if(window.$storytimebook.config.test_page>=0){
+      show_book();
+    }
+    else{
+      show_home();  
+    }
+    
   })
 
   media.on('loaded:sound', function(src){
@@ -11705,7 +11712,7 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
 
   var is_3d = has3d;
 
-  var startpage = 0;
+  var startpage = window.$storytimebook.config.test_page || 0;
 
   var rendered = false;
 
@@ -11889,7 +11896,10 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
       loading = true;
     })
 
+    var currentindex = -1;
+
     book.on('loaded', function(index){
+
       loading = false;
       if(index<=0){
         $('.leftarrow').css({
@@ -11919,7 +11929,11 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
 
       activedictionary = Dictionary(get_page_data(index), currentpos, currentsize);
       activehighlighter = TextHighlighter(html[index], data.config.highlighters ? data.config.highlighters[index] : []);
-      activehighlighter.start();
+
+      if(index!=currentindex){
+        activehighlighter.start();  
+      }
+      
       $('#book').append(activehighlighter.elem);
 
       activedictionary.on('sound', function(mp3){
@@ -11930,12 +11944,13 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
         book.triggernext();
         book.triggernext = null;
       }
-      else{
+      else if(index!=currentindex){
         book_factory.emit('view:page', index);
       }
 
       gallery.set_current_page(index);
 
+      currentindex = index;
       
     })
 
@@ -12267,7 +12282,7 @@ module.exports = function storytimeisland_texthighlighter(html, timings){
 
   var text = $elem.find('.pagetext').html().replace(/<br>/g, "\n");
 
-  text = text.replace(/([\w\.'"-]+)/g, function(match, word){
+  text = text.replace(/([\w\.,'"-\?\!]+)/g, function(match, word){
     return '<span class="highlightspan">' + word + '</span>';
   }).replace(/\n/g, '<br>');
 
@@ -12294,40 +12309,42 @@ module.exports = function storytimeisland_texthighlighter(html, timings){
 
   highlighter.start = function(){
     var currentindex = 0;
+    var usetimings = [].concat(timings);
 
-    console.log('-------------------------------------------');
-    console.log('-------------------------------------------');
-    console.log('starting');
-    console.dir(timings);
+    var lastiming = null;
 
-    function runhighlight(index){
-      var timing = timings[index+1];
-      
-      if(!timing){
+    function runhighlight(){
+      if(usetimings.length<=0){
         return;
       }
-
-      var gap = timing - timings[index];
-
-      highlightspans.eq(index).css({
-        opacity:1
-      })
-        
-      setTimeout(function(){
-        highlightspans.eq(index).addClass('animator').css({
-          opacity:0
-        })
-      }, 1000)
-
-      setTimeout(function(){
-        runhighlight(index+1);
-      }, gap)
+      var timing = usetimings.shift();
+      var useindex = currentindex;
+      currentindex++;
       
+      var gap = timing;
+
+      if(lastiming){
+        gap -= lastiming;
+      }
+
+      lastiming = timing;
+
+      setTimeout(function(){
+        highlightspans.eq(useindex).css({
+          opacity:1
+        })  
+
+        setTimeout(function(){
+          highlightspans.eq(useindex).addClass('animator').css({
+            opacity:0
+          })
+        }, 1000)
+
+        runhighlight();
+      }, gap)
     }
 
-    setTimeout(function(){
-      runhighlight(0);
-    }, timings[0]);
+    setTimeout(runhighlight, 300);
   }
 
   return highlighter;
@@ -12899,6 +12916,8 @@ module.exports = function storytimeisland_media(book, global_settings){
 
   media.playpagesounds = function(index){
 
+    this.stopsounds();
+    
     var fx = this.sounds["audio/pagefx/page" + index];
     if(!fx){
       return;

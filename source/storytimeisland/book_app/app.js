@@ -65,7 +65,14 @@ module.exports = function storytimeisland_application(){
   var media = Media(window.$storytimebook, global_settings);
 
   media.on('loaded:all', function(){
-    show_home();
+
+    if(window.$storytimebook.config.test_page>=0){
+      show_book();
+    }
+    else{
+      show_home();  
+    }
+    
   })
 
   media.on('loaded:sound', function(src){

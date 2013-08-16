@@ -61,6 +61,8 @@ npm-debug.log
 node_modules
 components
 androids
+data
+images
 raw_books
 html_books
 resizedimages

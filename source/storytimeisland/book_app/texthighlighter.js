@@ -30,7 +30,7 @@ module.exports = function storytimeisland_texthighlighter(html, timings){
 
   var text = $elem.find('.pagetext').html().replace(/<br>/g, "\n");
 
-  text = text.replace(/([\w\.'"-]+)/g, function(match, word){
+  text = text.replace(/([\w\.,'"-\?\!]+)/g, function(match, word){
     return '<span class="highlightspan">' + word + '</span>';
   }).replace(/\n/g, '<br>');
 
@@ -57,40 +57,42 @@ module.exports = function storytimeisland_texthighlighter(html, timings){
 
   highlighter.start = function(){
     var currentindex = 0;
+    var usetimings = [].concat(timings);
 
-    console.log('-------------------------------------------');
-    console.log('-------------------------------------------');
-    console.log('starting');
-    console.dir(timings);
+    var lastiming = null;
 
-    function runhighlight(index){
-      var timing = timings[index+1];
-      
-      if(!timing){
+    function runhighlight(){
+      if(usetimings.length<=0){
         return;
       }
-
-      var gap = timing - timings[index];
-
-      highlightspans.eq(index).css({
-        opacity:1
-      })
-        
-      setTimeout(function(){
-        highlightspans.eq(index).addClass('animator').css({
-          opacity:0
-        })
-      }, 1000)
-
-      setTimeout(function(){
-        runhighlight(index+1);
-      }, gap)
+      var timing = usetimings.shift();
+      var useindex = currentindex;
+      currentindex++;
       
+      var gap = timing;
+
+      if(lastiming){
+        gap -= lastiming;
+      }
+
+      lastiming = timing;
+
+      setTimeout(function(){
+        highlightspans.eq(useindex).css({
+          opacity:1
+        })  
+
+        setTimeout(function(){
+          highlightspans.eq(useindex).addClass('animator').css({
+            opacity:0
+          })
+        }, 1000)
+
+        runhighlight();
+      }, gap)
     }
 
-    setTimeout(function(){
-      runhighlight(0);
-    }, timings[0]);
+    setTimeout(runhighlight, 300);
   }
 
   return highlighter;

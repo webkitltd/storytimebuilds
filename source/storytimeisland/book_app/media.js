@@ -184,6 +184,8 @@ module.exports = function storytimeisland_media(book, global_settings){
 
   media.playpagesounds = function(index){
 
+    this.stopsounds();
+    
     var fx = this.sounds["audio/pagefx/page" + index];
     if(!fx){
       return;
