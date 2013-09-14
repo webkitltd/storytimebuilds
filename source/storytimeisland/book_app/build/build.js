@@ -27,9 +27,11 @@ function require(path, parent, orig) {
   // by invoking the module's
   // registered function
   if (!module.exports) {
-    module.exports = {};
-    module.client = module.component = true;
-    module.call(this, module.exports, require.relative(resolved), module);
+    var mod = {};
+    mod.exports = {};
+    mod.client = mod.component = true;
+    module.call(this, mod.exports, require.relative(resolved), mod);
+    module.exports = mod.exports;
   }
 
   return module.exports;
@@ -10146,7 +10148,7 @@ PageTurner.prototype.load_page = function(index){
 
   if(this.is3d){
     this.leafleft = this.create_double_leaf(this.page_html[index-1], this.page_html[index]);
-    this.leafright = this.create_double_leaf(this.page_html[index], this.page_html[index+1]);  
+    this.leafright = this.create_double_leaf(this.page_html[index], this.page_html[index+1]);
   }
   
   var existingbase = this.base.find('.leaf');
@@ -10233,7 +10235,7 @@ PageTurner.prototype.processmask = function(leaf, val){
   
 */
 PageTurner.prototype.create_leaf = function(side, html, domask){
-  var leaf = $('<div class="leaf nobackside"><div class="content nobackside">' + html + '</div></div>');
+  var leaf = $('<div class="leaf nobackside"><div class="content">' + html + '</div></div>');
   if(this.options.apply_pageclass){
     leaf.find('.content').addClass(this.options.apply_pageclass);
   }
@@ -11499,6 +11501,143 @@ Gesture.prototype.unbind = function(){
 
 
 });
+require.register("kewah-css-animation-event-types/index.js", function(exports, require, module){
+module.exports = getAnimationEventTypes();
+
+function camelCaseEventTypes(prefix) {
+  prefix = prefix || '';
+
+  return {
+    start: prefix + 'AnimationStart',
+    end: prefix + 'AnimationEnd',
+    iteration: prefix + 'AnimationIteration'
+  };
+}
+
+function lowerCaseEventTypes(prefix) {
+  prefix = prefix || '';
+
+  return {
+    start: prefix + 'animationstart',
+    end: prefix + 'animationend',
+    iteration: prefix + 'animationiteration'
+  };
+}
+
+/**
+ * @return {Object} Animation event types {start, end, iteration}
+ */
+
+function getAnimationEventTypes() {
+  var prefixes = ['webkit', 'Moz', 'O', ''];
+  var style = document.documentElement.style;
+
+  // browser compliant
+  if (undefined !== style.animationName) {
+    return lowerCaseEventTypes();
+  }
+
+  for (var i = 0, len = prefixes.length, prefix; i < len; i++) {
+    prefix = prefixes[i];
+
+    if (undefined !== style[prefix + 'AnimationName']) {
+      // Webkit
+      if (0 === i) {
+        return camelCaseEventTypes(prefix.toLowerCase());
+      }
+      // Mozilla
+      else if (1 === i) {
+        return lowerCaseEventTypes();
+      }
+      // Opera
+      else if (2 === i) {
+        return lowerCaseEventTypes(prefix.toLowerCase());
+      }
+    }
+  }
+
+  return {};
+}
+});
+require.register("ianstormtaylor-animate/index.js", function(exports, require, module){
+var $            = require('jquery')
+  , animationEnd = require('css-animation-event-types').end;
+
+
+/*
+ * Animate.
+ * Some animations aren't "in" or "out", so you'd want to use this one.
+ * Otherwise using `animate.in` and `animate.out` is easier.
+ */
+
+var animate = module.exports = function animate (element, animation, callback) {
+  // Animate.css kicks off animations when you add the `animated` class.
+  var className = animation + ' animated';
+
+  // Slides are handled by jQuery, since CSS doesn't have a good way of doing
+  // them natively. Not until we can animate to `auto` at least.
+  if (animation === 'slide-out') {
+    $(element).slideUp('slow', callback);
+    return;
+  } else if (animation === 'slide-in') {
+    $(element).slideDown('slow', callback);
+    return;
+  }
+
+  $(element)
+    .addClass(className)
+    .on(animationEnd, function () {
+      $(element)
+        .off(animationEnd)
+        .removeClass(className + ' animated');
+      if (callback) callback();
+    });
+
+  return this;
+};
+
+
+/*
+ * Animate in from invisible.
+ */
+
+module.exports.in = function animateIn (element, animation, add, callback) {
+  if (callback === undefined && 'function' === typeof add) callback = add;
+
+  animation = animation + '-in';
+
+  // If you've specific to add it, make sure the element is visible, in case it
+  // was animated out or `display: none`.
+  if (add) {
+    $(element)
+      .css('visibility', 'visible')
+      .slideDown(100);
+  }
+
+  animate(element, animation, callback);
+};
+
+
+/*
+ * Animate out from invisible.
+ */
+
+module.exports.out = function animateOut (element, animation, remove, callback) {
+  if (callback === undefined && 'function' === typeof remove) callback = remove;
+
+  animation = animation + '-out';
+
+  // Make sure the element gets hidden, and if you've specified to remove it,
+  // that it's height is taken care of smoothly when it's finally invisible.
+  animate(element, animation, function () {
+    if (remove) {
+      $(element)
+        .css('visibility', 'hidden')
+        .slideUp(100, callback);
+    }
+  });
+};
+});
 require.register("storytimeislandbook/app.js", function(exports, require, module){
 // this is the stub
 
@@ -11508,12 +11647,23 @@ var Book = require('./book');
 var Home = require('./home');
 var Media = require('./media');
 var gesture = require('gesture');
+var animate = require('animate');
 
 module.exports = function storytimeisland_application(){
 
   document.ontouchmove = function(event){
     event.preventDefault();
   }
+
+  var homepage_done = false;
+
+  var lastpage_template = $('script#lastpage_template');
+  var lastpage_html = null;
+
+  if(lastpage_template.length>0){
+    lastpage_html = lastpage_template.html();
+  }
+
 
   /*
   
@@ -11527,6 +11677,11 @@ module.exports = function storytimeisland_application(){
 
     var offset = page.extra_config.textoffset || {};
     var offsetleft = offset.x || 0;
+    var lastpagehtmlwrapper = '';
+
+    if(index==$storytimebook.pages.length-1 && lastpage_html){
+      lastpagehtmlwrapper = '<div>' + lastpage_html + '</div>';
+    }
 
     if(index==0){
       text = '';
@@ -11536,6 +11691,7 @@ module.exports = function storytimeisland_application(){
       '<div class="page">',
       '  <div class="pagebg pagebg' + no + '">',
       '    <div class="pagetext" style="text-align:' + page.alignment + ';">' + text + '</div>',
+            lastpagehtmlwrapper,
       '  </div>',
       '</div>'
     ].join("\n");
@@ -11562,7 +11718,7 @@ module.exports = function storytimeisland_application(){
     gallery:$('#gallerytemplate').text().replace(/^\s+/, '')
   };
 
-  var book_factory = Book('#book', html, templates, window.$storytimebook);
+  var book_factory = Book('#book', html, templates, window.$storytimebook, global_settings);
   var home_factory = Home('#home', templates, global_settings);
   var media = Media(window.$storytimebook, global_settings);
 
@@ -11672,7 +11828,8 @@ module.exports = function storytimeisland_application(){
     $('#bookviewer').css({
       display:'none'
     });
-    activemodule = home_factory();
+    activemodule = home_factory(homepage_done);
+    homepage_done = true;
   }
 
   function show_book(){
@@ -11708,7 +11865,7 @@ var TextHighlighter = require('./texthighlighter');
 var Gallery = require('./gallery');
 var PageTurner = require('pageturner');
 
-module.exports = function storytimeisland_book(bookselector, html, templates, data){
+module.exports = function storytimeisland_book(bookselector, html, templates, data, global_settings){
 
   var is_3d = has3d;
 
@@ -11928,13 +12085,21 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
       })
 
       activedictionary = Dictionary(get_page_data(index), currentpos, currentsize);
-      activehighlighter = TextHighlighter(html[index], data.config.highlighters ? data.config.highlighters[index] : []);
 
-      if(index!=currentindex){
-        activehighlighter.start();  
+      // only do the text highlighting when the voice is reading
+      if(global_settings.voice_audio){
+        activehighlighter = TextHighlighter(html[index], data.config.highlighters ? data.config.highlighters[index] : []);
+
+        if(index!=currentindex){
+          activehighlighter.start();  
+        }
+        $('#book').append(activehighlighter.elem);
       }
+      else{
+        activehighlighter = null;
+      }
+
       
-      $('#book').append(activehighlighter.elem);
 
       activedictionary.on('sound', function(mp3){
         book_factory.emit('dictionary', mp3);
@@ -11989,6 +12154,12 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
 
     gallery.on('loadpage', function(index){
       close_gallery();
+      if(index==0){
+        apply_shadow(0);
+      }
+      else if(index==pagecount-1){
+        apply_shadow(pagecount-1);
+      }
       book.animate_index(index);
     })
 
@@ -12588,6 +12759,8 @@ require.register("storytimeislandbook/home.js", function(exports, require, modul
 var $ = require('jquery');
 var Emitter = require('emitter');
 var Teddy = require('./teddy');
+var animate = require('animate');
+
 
 module.exports = function storytimeisland_home(homeselector, templates, global_settings){
 
@@ -12598,7 +12771,10 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
     HOME PAGE SETUP
     
   */
-  function homepage_factory(){
+
+  // donemode means we have already done the homepage
+  // just display don't animate
+  function homepage_factory(donemode){
 
     $(homeselector).html(templates.homepage);
 
@@ -12619,18 +12795,20 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
       homepage_factory.emit('teddysound');
     })
 
+    var shaked = {};
+
     currenteddy.on('bubblemode', function(mode){
-      if(mode){
-        $('#bubblebutton').css({
-          'visibility':'visible'
-        })
+      var elemid = mode ? '#bubblebutton' : '#nobubblebutton';
+
+      if(!shaked[elemid]){
+        animate($(elemid).get(0), 'bounce')
+        setTimeout(function(){
+          $(elemid).removeClass('animate');
+        }, 2000)
+        shaked[elemid] = true;
       }
-      else{
-        $('#nobubblebutton').css({
-          'visibility':'visible'
-        })
-      }
-      global_settings.voice_audio = mode;
+      
+      //global_settings.voice_audio = mode;
       assign_audio_buttons();
     })
 
@@ -12640,23 +12818,8 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
 
     currenteddy.on('finished', function(){
 
-      var mode = false;
-      var counter = 0;
-      function run_flicker(){
-        mode = !mode;
-        counter++;
-        if(counter>=11){
-          return;
-        }
+      animate($('#frontpageimage').get(0), 'shake');
 
-        $('#booktd').css({
-          'padding-top':(mode ? 10 : 0) + 'px'
-        })
-        
-        setTimeout(run_flicker, 100);
-      }
-
-      run_flicker();
     })    
 
     currenteddy.on('flicker', function(){
@@ -12682,9 +12845,17 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
       run_flicker();
     })
 
-    setTimeout(function(){
-      currenteddy.animate();
-    }, 1);
+    if(!donemode){
+      setTimeout(function(){
+        currenteddy.animate();
+      }, 1);  
+    }
+    else{
+      console.log('-------------------------------------------');
+      console.log('-------------------------------------------');
+      console.log('home done');
+    }
+    
 
     var actions = {
       frontpageimage:function(){
@@ -13339,6 +13510,7 @@ module.exports = function storytimeisland_teddy(selector, templates){
 
 
 
+
 require.alias("component-emitter/index.js", "storytimeislandbook/deps/emitter/index.js");
 require.alias("component-emitter/index.js", "emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
@@ -13383,3 +13555,9 @@ require.alias("component-emitter/index.js", "component-gesture/deps/emitter/inde
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
 
 require.alias("component-hammer.js/index.js", "component-gesture/deps/hammer/index.js");
+
+require.alias("ianstormtaylor-animate/index.js", "storytimeislandbook/deps/animate/index.js");
+require.alias("ianstormtaylor-animate/index.js", "animate/index.js");
+require.alias("component-jquery/index.js", "ianstormtaylor-animate/deps/jquery/index.js");
+
+require.alias("kewah-css-animation-event-types/index.js", "ianstormtaylor-animate/deps/css-animation-event-types/index.js");

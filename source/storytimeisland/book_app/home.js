@@ -3,6 +3,8 @@
 var $ = require('jquery');
 var Emitter = require('emitter');
 var Teddy = require('./teddy');
+var animate = require('animate');
+
 
 module.exports = function storytimeisland_home(homeselector, templates, global_settings){
 
@@ -13,7 +15,10 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
     HOME PAGE SETUP
     
   */
-  function homepage_factory(){
+
+  // donemode means we have already done the homepage
+  // just display don't animate
+  function homepage_factory(donemode){
 
     $(homeselector).html(templates.homepage);
 
@@ -34,18 +39,20 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
       homepage_factory.emit('teddysound');
     })
 
+    var shaked = {};
+
     currenteddy.on('bubblemode', function(mode){
-      if(mode){
-        $('#bubblebutton').css({
-          'visibility':'visible'
-        })
+      var elemid = mode ? '#bubblebutton' : '#nobubblebutton';
+
+      if(!shaked[elemid]){
+        animate($(elemid).get(0), 'bounce')
+        setTimeout(function(){
+          $(elemid).removeClass('animate');
+        }, 2000)
+        shaked[elemid] = true;
       }
-      else{
-        $('#nobubblebutton').css({
-          'visibility':'visible'
-        })
-      }
-      global_settings.voice_audio = mode;
+      
+      //global_settings.voice_audio = mode;
       assign_audio_buttons();
     })
 
@@ -55,23 +62,8 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
 
     currenteddy.on('finished', function(){
 
-      var mode = false;
-      var counter = 0;
-      function run_flicker(){
-        mode = !mode;
-        counter++;
-        if(counter>=11){
-          return;
-        }
+      animate($('#frontpageimage').get(0), 'shake');
 
-        $('#booktd').css({
-          'padding-top':(mode ? 10 : 0) + 'px'
-        })
-        
-        setTimeout(run_flicker, 100);
-      }
-
-      run_flicker();
     })    
 
     currenteddy.on('flicker', function(){
@@ -97,9 +89,17 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
       run_flicker();
     })
 
-    setTimeout(function(){
-      currenteddy.animate();
-    }, 1);
+    if(!donemode){
+      setTimeout(function(){
+        currenteddy.animate();
+      }, 1);  
+    }
+    else{
+      console.log('-------------------------------------------');
+      console.log('-------------------------------------------');
+      console.log('home done');
+    }
+    
 
     var actions = {
       frontpageimage:function(){

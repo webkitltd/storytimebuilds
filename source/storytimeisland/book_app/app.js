@@ -6,12 +6,23 @@ var Book = require('./book');
 var Home = require('./home');
 var Media = require('./media');
 var gesture = require('gesture');
+var animate = require('animate');
 
 module.exports = function storytimeisland_application(){
 
   document.ontouchmove = function(event){
     event.preventDefault();
   }
+
+  var homepage_done = false;
+
+  var lastpage_template = $('script#lastpage_template');
+  var lastpage_html = null;
+
+  if(lastpage_template.length>0){
+    lastpage_html = lastpage_template.html();
+  }
+
 
   /*
   
@@ -25,6 +36,11 @@ module.exports = function storytimeisland_application(){
 
     var offset = page.extra_config.textoffset || {};
     var offsetleft = offset.x || 0;
+    var lastpagehtmlwrapper = '';
+
+    if(index==$storytimebook.pages.length-1 && lastpage_html){
+      lastpagehtmlwrapper = '<div>' + lastpage_html + '</div>';
+    }
 
     if(index==0){
       text = '';
@@ -34,6 +50,7 @@ module.exports = function storytimeisland_application(){
       '<div class="page">',
       '  <div class="pagebg pagebg' + no + '">',
       '    <div class="pagetext" style="text-align:' + page.alignment + ';">' + text + '</div>',
+            lastpagehtmlwrapper,
       '  </div>',
       '</div>'
     ].join("\n");
@@ -60,7 +77,7 @@ module.exports = function storytimeisland_application(){
     gallery:$('#gallerytemplate').text().replace(/^\s+/, '')
   };
 
-  var book_factory = Book('#book', html, templates, window.$storytimebook);
+  var book_factory = Book('#book', html, templates, window.$storytimebook, global_settings);
   var home_factory = Home('#home', templates, global_settings);
   var media = Media(window.$storytimebook, global_settings);
 
@@ -170,7 +187,8 @@ module.exports = function storytimeisland_application(){
     $('#bookviewer').css({
       display:'none'
     });
-    activemodule = home_factory();
+    activemodule = home_factory(homepage_done);
+    homepage_done = true;
   }
 
   function show_book(){

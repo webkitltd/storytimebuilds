@@ -8,7 +8,7 @@ var TextHighlighter = require('./texthighlighter');
 var Gallery = require('./gallery');
 var PageTurner = require('pageturner');
 
-module.exports = function storytimeisland_book(bookselector, html, templates, data){
+module.exports = function storytimeisland_book(bookselector, html, templates, data, global_settings){
 
   var is_3d = has3d;
 
@@ -228,13 +228,21 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
       })
 
       activedictionary = Dictionary(get_page_data(index), currentpos, currentsize);
-      activehighlighter = TextHighlighter(html[index], data.config.highlighters ? data.config.highlighters[index] : []);
 
-      if(index!=currentindex){
-        activehighlighter.start();  
+      // only do the text highlighting when the voice is reading
+      if(global_settings.voice_audio){
+        activehighlighter = TextHighlighter(html[index], data.config.highlighters ? data.config.highlighters[index] : []);
+
+        if(index!=currentindex){
+          activehighlighter.start();  
+        }
+        $('#book').append(activehighlighter.elem);
       }
+      else{
+        activehighlighter = null;
+      }
+
       
-      $('#book').append(activehighlighter.elem);
 
       activedictionary.on('sound', function(mp3){
         book_factory.emit('dictionary', mp3);
@@ -289,6 +297,12 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
 
     gallery.on('loadpage', function(index){
       close_gallery();
+      if(index==0){
+        apply_shadow(0);
+      }
+      else if(index==pagecount-1){
+        apply_shadow(pagecount-1);
+      }
       book.animate_index(index);
     })
 

@@ -223,13 +223,14 @@ program
       wrench.copyDirSyncRecursive(inputfolder + '/icons', outputfolder + '/icons');
     }
 
-
-
     var data = new BookData(name, inputfolder);
+
+    if(fs.existsSync(inputfolder + '/lastpage.html')){
+      data.last_page_html = fs.readFileSync(inputfolder + '/lastpage.html', 'utf8');    
+    }
 
     data.load(function(){
       var template = new BookTemplate(path.normalize(__dirname + '/../source/storytimeisland/book_template/index.ejs'), data);
-
       var html = template.render();
       fs.writeFileSync(outputfolder + '/index.html', html, 'utf8');
       fs.unlinkSync(outputfolder + '/index.ejs');

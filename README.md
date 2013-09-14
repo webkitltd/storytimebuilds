@@ -44,10 +44,8 @@ DONT FORGET TO DO npm install from within this folder to get modules installed
 
 Once you have installed - you must create some folders within this repository:
 
- * raw_books
  * html_books
  * androids
-
 
 ## making a book
 The books are created using the **buildscript** - this is a node.js command line script that knows how to move all the files around to create our books.
@@ -77,19 +75,13 @@ The scripts to convert a book into HTML format (on Mac \ = /)
 
 **Storytimeisland:**
 
-	node bin\book.js storytimeisland [bookname]
-	node bin\book.js storytimeisland freddy
+	node bin\book.js singlebook storytimeisland [bookname]
+	node bin\book.js singlebook storytimeisland freddy
 
 **iboard:**
 
-	node bin\book.js iboard [bookname]
-	node bin\book.js iboard monsters
-
-This step creates a new folder: **/raw_books/[provider]/[bookname]**
-
-So in the case of storytime freddy:
-
-	/raw_books/storytimeisland/freddy
+	node bin\book.js singlebookiboard [bookname]
+	node bin\book.js singlebook iboard monsters
 
 #### step 3 - view the book
 This step allows you to see the output of the HTML book in a browser.

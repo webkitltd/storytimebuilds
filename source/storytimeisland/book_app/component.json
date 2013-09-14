@@ -9,8 +9,9 @@
     "component/has-translate3d": "*",
     "binocarlos/pageturner": "*",
     "binocarlos/pagefader": "*",
-    "component/hammer.js": "*",    
-    "component/gesture": "*"
+    "component/hammer.js": "*",
+    "component/gesture": "*",
+    "ianstormtaylor/animate": "*"
   },
   "development": {},
   "styles": [
@@ -26,5 +27,6 @@
     "media.js",
     "platform.js",
     "teddy.js"
-  ]
+  ],
+  "remotes": []
 }
