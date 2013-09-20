@@ -8,7 +8,6 @@
     "component/jquery": "*",
     "component/has-translate3d": "*",
     "binocarlos/pageturner": "*",
-    "binocarlos/pagefader": "*",
     "component/hammer.js": "*",
     "component/gesture": "*",
     "ianstormtaylor/animate": "*"

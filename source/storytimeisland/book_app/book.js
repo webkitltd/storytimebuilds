@@ -45,7 +45,7 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
     $(bookselector).html(html.join("\n"));
 
     var pagecount = $('.page').length;
-    
+
     var book = new PageTurner({
       has3d:is_3d,
       bookselector:bookselector,
@@ -160,7 +160,19 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
       setTimeout(function(){
         currentsize = newsize;
 
+        console.log('-------------------------------------------');
+        console.log('book config');
+        console.dir(window.$storytimebook.config);
+
+        // sort out the shifting of dictionary in books > 2048 wide
+        if(!window.$storytimebook.config._calculated){
+          window.$storytimebook.config.realwidth = window.$storytimebook.config.width;
+          window.$storytimebook.config.width = 2048;
+          window.$storytimebook.config._calculated = true;
+        }
+
         currentsize.ratio = currentsize.width / window.$storytimebook.config.width;
+        currentsize.dictionary_offset = (window.$storytimebook.config.realwidth - window.$storytimebook.config.width)/2;
 
         var windowsize = {
           width:window.innerWidth,
@@ -176,6 +188,11 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
         }
 
         $(bookselector).css({
+          left:xpos + 'px',
+          top:ypos + 'px'
+        })
+
+        $('#lastpagehtml').css({
           left:xpos + 'px',
           top:ypos + 'px'
         })
@@ -197,6 +214,8 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
     })
 
     var currentindex = -1;
+
+    var shadowloaded = false;
 
     book.on('loaded', function(index){
 
@@ -223,9 +242,12 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
         })
       }
 
-      $('#shadow').css({
-        display:'block'
-      })
+      if(shadowloaded){
+        $('#shadow').css({
+          display:'block'
+        })  
+      }
+      
 
       activedictionary = Dictionary(get_page_data(index), currentpos, currentsize);
 
@@ -277,6 +299,9 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
       else if(book.currentpage==pagecount-2 && side=='right'){
         apply_shadow(pagecount-1);
       }
+      else if(book.currentpage==pagecount-1){
+        $('#lastpagehtml').hide();
+      }
 
       animating = true;
       book_factory.emit('animate');
@@ -299,10 +324,12 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
       close_gallery();
       if(index==0){
         apply_shadow(0);
+
       }
       else if(index==pagecount-1){
         apply_shadow(pagecount-1);
       }
+      $('#lastpagehtml').hide();
       book.animate_index(index);
     })
 
@@ -399,6 +426,13 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
     }
 
     book.render();
+
+    $('#shadow').hide();
+
+    setTimeout(function(){
+      $('#shadow').fadeIn();
+      shadowloaded = true;
+    }, 1000)
 
     book.destroy = function(){
       $(bookselector).html('');

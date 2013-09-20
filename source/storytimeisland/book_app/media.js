@@ -45,12 +45,22 @@ module.exports = function storytimeisland_media(book, global_settings){
     all_sounds.push("audio/pagespeech/page0");
     all_sounds.push("audio/pagefx/page0");
 
+    var found = {};
     book.pages.forEach(function(page, i){
 
       if(page.dictionary){
+        var extra_config = page.extra_config;
+
         page.dictionary.forEach(function(entry){
-          var key = entry.name.replace(/_.*$/, '');
-          dictionary_sounds["audio/sfx/" + key] = true;
+          var sound_name = entry.name.replace(/_.*$/, '');
+          if(extra_config && extra_config.sounds){
+            var sound = extra_config.sounds[sound_name];
+            if(sound){
+              sound_name = sound.sound;
+            }
+          }
+          dictionary_sounds["audio/sfx/" + sound_name] = true;
+          found[sound_name] = true;          
         })
       }
 
@@ -61,6 +71,10 @@ module.exports = function storytimeisland_media(book, global_settings){
       
       all_images.push('images/page' + page.number + '.png');
     })
+
+    for(var i in found){
+      console.log(i);
+    }
 
     var keys = [];
     for(var p in dictionary_sounds){

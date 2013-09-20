@@ -59,6 +59,7 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     
   */
   function dictionary_handle(evpos){
+
     /*
       
       where they clicked in relation to the book on the screen
@@ -79,6 +80,12 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
       y:bookevpos.y * (1/currentsize.ratio)
     }
 
+    var offset = currentsize.dictionary_offset;
+
+    if(offset){
+      adjusted_evpos.x += offset;
+    }
+
     var block = find_dictionary(adjusted_evpos);
 
     if(!block){
@@ -95,9 +102,7 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     var extra_config = page_config.extra_config;
 
     var mp3 = sound_name;
-    var text = sound_name.replace(/^(\w)/, function(st){
-      return st.toUpperCase();
-    })
+    var text = sound_name;//
 
     if(extra_config && extra_config.sounds){
       var sound = extra_config.sounds[sound_name];
@@ -107,9 +112,20 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
       }
     }
 
+    
 
+    text = text.replace(/^\W*/, '');
+    text = text.replace(/\W*$/, '');
 
-    var popup = $('<div class="dictionarytab animatorquick">' + text + '</div>');
+    var textparts = text.split(' ').map(function(s){
+      return s.replace(/^(\w)/, function(st){
+        return st.toUpperCase();
+      })  
+    })
+
+    var final_text = textparts.join(' ');
+
+    var popup = $('<div class="dictionarytab animatorquick">' + final_text + '</div>');
 
     popup.css({
       left:evpos.x-50 + 'px',

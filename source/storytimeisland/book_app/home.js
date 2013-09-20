@@ -5,7 +5,6 @@ var Emitter = require('emitter');
 var Teddy = require('./teddy');
 var animate = require('animate');
 
-
 module.exports = function storytimeisland_home(homeselector, templates, global_settings){
 
   var currenteddy = null;

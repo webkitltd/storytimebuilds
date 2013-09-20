@@ -10,5 +10,5 @@ lineSpacing=0
 rightMargin=0
 leftMargin=0
 letterSpacing=0
-extra_config=var page = {};
+extra_config=var page = {	sounds:{						bush:{			text:"flowers",			sound:"flowers2"		},				flowers:{			text:"flowers",			sound:"flowers1"		},		dragon:{			text:"dragon",			sound:"bigdragon"		},		babydragon:{			text:"baby dragon",			sound:"baby1"		}	}};
 dictionary_length=5

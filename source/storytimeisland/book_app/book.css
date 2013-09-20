@@ -414,6 +414,11 @@ span.badge-warning{
     width: 320px !important;
     height: 240px !important;
   }
+  #lastpagehtml {
+    margin-left:160px !important;
+    width: 160px !important;
+    height: 768px !important;
+  }
   .pagetext{
     padding-top:5px !important;
     padding-left:8px !important;
@@ -489,6 +494,11 @@ span.badge-warning{
     width: 476px !important;
     height: 357px !important;
   }
+  #lastpagehtml {
+    margin-left:238px !important;
+    width: 238px !important;
+    height: 768px !important;
+  }
   .pagetext{
     padding-top:8px !important;
     padding-left:12px !important;
@@ -560,6 +570,11 @@ span.badge-warning{
   #book {
     width: 680px !important;
     height: 510px !important;
+  }
+  #lastpagehtml {
+    margin-left:340px !important;
+    width: 340px !important;
+    height: 768px !important;
   }
   .pagetext{
     padding-top:10px !important;
@@ -635,6 +650,11 @@ span.badge-warning{
     width: 800px !important;
     height: 600px !important;
   }
+  #lastpagehtml {
+    margin-left:400px !important;
+    width: 400px !important;
+    height: 768px !important;
+  }
   .pagetext{
     padding-top:15px !important;
     padding-left:20px !important;
@@ -704,6 +724,11 @@ span.badge-warning{
 @media only screen and (min-height: 768px) {
   #book {
     width: 1024px !important;
+    height: 768px !important;
+  }
+  #lastpagehtml {
+    margin-left:512px !important;
+    width: 512px !important;
     height: 768px !important;
   }
   .pagetext{

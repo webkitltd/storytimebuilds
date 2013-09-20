@@ -16,14 +16,6 @@ module.exports = function storytimeisland_application(){
 
   var homepage_done = false;
 
-  var lastpage_template = $('script#lastpage_template');
-  var lastpage_html = null;
-
-  if(lastpage_template.length>0){
-    lastpage_html = lastpage_template.html();
-  }
-
-
   /*
   
     grab the source of the book
@@ -36,11 +28,6 @@ module.exports = function storytimeisland_application(){
 
     var offset = page.extra_config.textoffset || {};
     var offsetleft = offset.x || 0;
-    var lastpagehtmlwrapper = '';
-
-    if(index==$storytimebook.pages.length-1 && lastpage_html){
-      lastpagehtmlwrapper = '<div>' + lastpage_html + '</div>';
-    }
 
     if(index==0){
       text = '';
@@ -50,7 +37,6 @@ module.exports = function storytimeisland_application(){
       '<div class="page">',
       '  <div class="pagebg pagebg' + no + '">',
       '    <div class="pagetext" style="text-align:' + page.alignment + ';">' + text + '</div>',
-            lastpagehtmlwrapper,
       '  </div>',
       '</div>'
     ].join("\n");
@@ -65,7 +51,6 @@ module.exports = function storytimeisland_application(){
     
   */
   var activemodule = null;
-
 
   var global_settings = {
     voice_audio:true
@@ -110,12 +95,17 @@ module.exports = function storytimeisland_application(){
     
   })
 
-
-
   book_factory.on('view:page', function(index){
     setTimeout(function(){
       media.playpagesounds(index);  
     }, 300)
+
+    if(index<window.$storytimebook.pages.length-1){
+      $('#lastpagehtml').hide();
+    }
+    else{
+      $('#lastpagehtml').show();
+    }
     
   })
 
@@ -199,6 +189,10 @@ module.exports = function storytimeisland_application(){
       display:'block'
     });
     activemodule = book_factory();
+    $('#book').hide();
+    setTimeout(function(){
+      $('#book').fadeIn();
+    }, 1000)
   }
 
   function load_all(){

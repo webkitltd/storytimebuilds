@@ -23,7 +23,7 @@
     <name><%= settings.apptitle %></name>
 
     <description>
-        A sample Apache Cordova application that responds to the deviceready event.
+        Story Time Island Book: <%= settings.apptitle %>
     </description>
 
     <author href="http://storytimeisland.com" email="info@storytimeisland.com">

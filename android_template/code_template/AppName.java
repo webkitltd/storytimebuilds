@@ -37,7 +37,8 @@ public class <%= settings.appname %> extends DroidGap
     	getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, 
     			 WindowManager.LayoutParams.FLAG_FULLSCREEN | 
     			 WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-    	super.setIntegerProperty("splashscreen", R.drawable.splash);
+
+    	   super.setIntegerProperty("splashscreen", R.drawable.splash);
     	
         super.loadUrl("file:///android_asset/www/index.html", 10);
         

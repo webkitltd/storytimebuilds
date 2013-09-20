@@ -26,11 +26,13 @@ function require(path, parent, orig) {
   // perform real require()
   // by invoking the module's
   // registered function
-  if (!module.exports) {
+  if (!module._resolving && !module.exports) {
     var mod = {};
     mod.exports = {};
     mod.client = mod.component = true;
+    module._resolving = true;
     module.call(this, mod.exports, require.relative(resolved), mod);
+    delete module._resolving;
     module.exports = mod.exports;
   }
 
@@ -10060,6 +10062,10 @@ function PageTurner(options){
   this.options = options;
   this.is3d = options.has3d;
 
+  console.log('-------------------------------------------');
+  console.log('-------------------------------------------');
+  console.log('HAS 3d: ' + this.is3d);
+
   this.page_html = [];
   this.currentpage = 0;
 
@@ -10431,185 +10437,6 @@ function setPerspective(elem, amount){
 });
 require.register("binocarlos-pageturner/templates/booktemplate.js", function(exports, require, module){
 module.exports = '<div class="pageturner-book">\n	<div id="base">\n\n	</div>\n	<div id="leaves">\n\n	</div>\n</div>';
-});
-require.register("binocarlos-pagefader/index.js", function(exports, require, module){
-/*
-
-  PageHammer
-  
-*/
-
-var Emitter = require('emitter');
-var $ = require('jquery');
-
-module.exports = PageFader;
-
-var options_defaults = {
-  masksize:1,
-  animtime:2000,
-  perspective:800
-}
-
-function PageFader(options){
-  options = this.options = options || {};
-
-  for(var prop in options_defaults){
-    if(options[prop]===null || options[prop]===undefined){
-      options[prop] = options_defaults[prop];
-    }
-  }
-
-  if (!(this instanceof PageFader)) return new PageFader(options);
-
-  var self = this;
-
-  Emitter.call(this);
-
-  this.options = options;
-
-  this.page_html = [];
-  this.currentpage = 0;
-
-  this.book = $(this.options.bookselector);
-
-  if(this.book.length<=0){
-    throw new Error('pageturner cannot find the element for the book');
-  }
-}
-
-/**
- * Inherit from `Emitter.prototype`.
- */
-
-PageFader.prototype = new Emitter;
-
-PageFader.prototype.render = function(){
-  var self = this;
-  this.pages = this.book.find(this.options.pageselector);
-
-  if(this.pages.length<=0){
-    throw new Error('pageturner cannot find any pages for the book');
-  }
-
-  var html = [];
-  this.pages.each(function(){
-    html.push('<div class="pagewrapper"><div class="bookpage">' + $(this).html() + '</div></div>');
-  })
-
-  var allhtml = '<div id="allwrapper">' + html.join('') + '</div>';
-
-  this.book.html(allhtml);
-
-  this.allwrapper = this.book.find('#allwrapper');
-  this.allwrapper.css({
-    position:'absolute',
-    overflow:'hidden'
-  })
-  this.pages = this.book.find('.pagewrapper');
-  this.book.css({
-    overflow:'hidden'
-  })
-  this.pages.css({
-    position:'absolute'    
-  })
-
-  this.pages.css({
-    display:'none'
-  })
-  this.pages.eq(0).css({
-    display:'block'
-  })
-
-  setAnimationTime(this.pages, 1200);
-
-  this.currentpage = 0;
-  this.resize();
-
-  this.emit('loaded', this.currentpage);
-
-
-  var resizingID = null;
-
-  $(window).resize(function(){
-    if(resizingID){
-      clearTimeout(resizingID);
-    }
-    resizingID = setTimeout(function(){
-      self.resize();
-    }, 100)
-    
-  })
-}
-
-PageFader.prototype.resize = function(){
-  var self = this;
-  this.size = {
-    width:this.book.width(),
-    height:this.book.height()
-  }
-
-  this.book.width(this.size.width).height(this.size.height);
-  this.pages.width(this.size.width).height(this.size.height);
-  this.pages.each(function(index){
-    $(this).css({
-      left:((index) * self.size.width) + 'px'
-    })
-  })
-  this.emit('resize', this.size);
-}
-
-PageFader.prototype.load_page = function(index){
-  console.log('-------------------------------------------');
-  console.log('load');
-  console.dir(index);
-}
-
-PageFader.prototype.animate_direction = function(dir){
-  var nextpage = this.currentpage + dir;
-  if(nextpage<0 || nextpage>=this.pages.length){
-    return;
-  }
-
-  var currentelem = this.pages.eq(this.currentpage);
-  var nextelem = this.pages.eq(nextpage);
-  
-  var offset = (-nextpage * (this.size.width));
-
-  currentelem.css({
-    left:-(this.size.width) + 'px'
-  })
-
-  setTimeout(function(){
-    currentelem.css({
-      display:'none'
-    })
-  }, this.options.animtime)
-
-/*
-  var currentelem = this.pages.eq(this.currentpage);
-  var nextelem = this.pages.eq(nextpage);
-
-  nextelem.insertAfter(currentelem);
-
-  nextelem.show();
-
-  setTimeout(function(){
-    currentelem.hide();
-  }, 100)
-
-  */
-  this.currentpage = nextpage;
-  this.emit('loaded', this.currentpage);
-
-}
-
-/*
-function setAnimationTime(elem, ms){
-  ['', '-webkit-', '-moz-', '-ms-', '-o-'].forEach(function(prefix){
-    elem.css(prefix + 'transition', 'all ' + ms + 'ms');
-  })
-}
-*/
 });
 require.register("component-hammer.js/index.js", function(exports, require, module){
 /*
@@ -11657,14 +11484,6 @@ module.exports = function storytimeisland_application(){
 
   var homepage_done = false;
 
-  var lastpage_template = $('script#lastpage_template');
-  var lastpage_html = null;
-
-  if(lastpage_template.length>0){
-    lastpage_html = lastpage_template.html();
-  }
-
-
   /*
   
     grab the source of the book
@@ -11677,11 +11496,6 @@ module.exports = function storytimeisland_application(){
 
     var offset = page.extra_config.textoffset || {};
     var offsetleft = offset.x || 0;
-    var lastpagehtmlwrapper = '';
-
-    if(index==$storytimebook.pages.length-1 && lastpage_html){
-      lastpagehtmlwrapper = '<div>' + lastpage_html + '</div>';
-    }
 
     if(index==0){
       text = '';
@@ -11691,7 +11505,6 @@ module.exports = function storytimeisland_application(){
       '<div class="page">',
       '  <div class="pagebg pagebg' + no + '">',
       '    <div class="pagetext" style="text-align:' + page.alignment + ';">' + text + '</div>',
-            lastpagehtmlwrapper,
       '  </div>',
       '</div>'
     ].join("\n");
@@ -11706,7 +11519,6 @@ module.exports = function storytimeisland_application(){
     
   */
   var activemodule = null;
-
 
   var global_settings = {
     voice_audio:true
@@ -11751,12 +11563,17 @@ module.exports = function storytimeisland_application(){
     
   })
 
-
-
   book_factory.on('view:page', function(index){
     setTimeout(function(){
       media.playpagesounds(index);  
     }, 300)
+
+    if(index<window.$storytimebook.pages.length-1){
+      $('#lastpagehtml').hide();
+    }
+    else{
+      $('#lastpagehtml').show();
+    }
     
   })
 
@@ -11840,6 +11657,10 @@ module.exports = function storytimeisland_application(){
       display:'block'
     });
     activemodule = book_factory();
+    $('#book').hide();
+    setTimeout(function(){
+      $('#book').fadeIn();
+    }, 1000)
   }
 
   function load_all(){
@@ -11902,7 +11723,7 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
     $(bookselector).html(html.join("\n"));
 
     var pagecount = $('.page').length;
-    
+
     var book = new PageTurner({
       has3d:is_3d,
       bookselector:bookselector,
@@ -12017,7 +11838,19 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
       setTimeout(function(){
         currentsize = newsize;
 
+        console.log('-------------------------------------------');
+        console.log('book config');
+        console.dir(window.$storytimebook.config);
+
+        // sort out the shifting of dictionary in books > 2048 wide
+        if(!window.$storytimebook.config._calculated){
+          window.$storytimebook.config.realwidth = window.$storytimebook.config.width;
+          window.$storytimebook.config.width = 2048;
+          window.$storytimebook.config._calculated = true;
+        }
+
         currentsize.ratio = currentsize.width / window.$storytimebook.config.width;
+        currentsize.dictionary_offset = (window.$storytimebook.config.realwidth - window.$storytimebook.config.width)/2;
 
         var windowsize = {
           width:window.innerWidth,
@@ -12033,6 +11866,11 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
         }
 
         $(bookselector).css({
+          left:xpos + 'px',
+          top:ypos + 'px'
+        })
+
+        $('#lastpagehtml').css({
           left:xpos + 'px',
           top:ypos + 'px'
         })
@@ -12054,6 +11892,8 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
     })
 
     var currentindex = -1;
+
+    var shadowloaded = false;
 
     book.on('loaded', function(index){
 
@@ -12080,9 +11920,12 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
         })
       }
 
-      $('#shadow').css({
-        display:'block'
-      })
+      if(shadowloaded){
+        $('#shadow').css({
+          display:'block'
+        })  
+      }
+      
 
       activedictionary = Dictionary(get_page_data(index), currentpos, currentsize);
 
@@ -12134,6 +11977,9 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
       else if(book.currentpage==pagecount-2 && side=='right'){
         apply_shadow(pagecount-1);
       }
+      else if(book.currentpage==pagecount-1){
+        $('#lastpagehtml').hide();
+      }
 
       animating = true;
       book_factory.emit('animate');
@@ -12156,10 +12002,12 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
       close_gallery();
       if(index==0){
         apply_shadow(0);
+
       }
       else if(index==pagecount-1){
         apply_shadow(pagecount-1);
       }
+      $('#lastpagehtml').hide();
       book.animate_index(index);
     })
 
@@ -12257,6 +12105,13 @@ module.exports = function storytimeisland_book(bookselector, html, templates, da
 
     book.render();
 
+    $('#shadow').hide();
+
+    setTimeout(function(){
+      $('#shadow').fadeIn();
+      shadowloaded = true;
+    }, 1000)
+
     book.destroy = function(){
       $(bookselector).html('');
       gallery.destroy();
@@ -12336,6 +12191,7 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     
   */
   function dictionary_handle(evpos){
+
     /*
       
       where they clicked in relation to the book on the screen
@@ -12356,6 +12212,12 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
       y:bookevpos.y * (1/currentsize.ratio)
     }
 
+    var offset = currentsize.dictionary_offset;
+
+    if(offset){
+      adjusted_evpos.x += offset;
+    }
+
     var block = find_dictionary(adjusted_evpos);
 
     if(!block){
@@ -12372,9 +12234,7 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     var extra_config = page_config.extra_config;
 
     var mp3 = sound_name;
-    var text = sound_name.replace(/^(\w)/, function(st){
-      return st.toUpperCase();
-    })
+    var text = sound_name;//
 
     if(extra_config && extra_config.sounds){
       var sound = extra_config.sounds[sound_name];
@@ -12384,9 +12244,20 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
       }
     }
 
+    
 
+    text = text.replace(/^\W*/, '');
+    text = text.replace(/\W*$/, '');
 
-    var popup = $('<div class="dictionarytab animatorquick">' + text + '</div>');
+    var textparts = text.split(' ').map(function(s){
+      return s.replace(/^(\w)/, function(st){
+        return st.toUpperCase();
+      })  
+    })
+
+    var final_text = textparts.join(' ');
+
+    var popup = $('<div class="dictionarytab animatorquick">' + final_text + '</div>');
 
     popup.css({
       left:evpos.x-50 + 'px',
@@ -12761,7 +12632,6 @@ var Emitter = require('emitter');
 var Teddy = require('./teddy');
 var animate = require('animate');
 
-
 module.exports = function storytimeisland_home(homeselector, templates, global_settings){
 
   var currenteddy = null;
@@ -12948,12 +12818,22 @@ module.exports = function storytimeisland_media(book, global_settings){
     all_sounds.push("audio/pagespeech/page0");
     all_sounds.push("audio/pagefx/page0");
 
+    var found = {};
     book.pages.forEach(function(page, i){
 
       if(page.dictionary){
+        var extra_config = page.extra_config;
+
         page.dictionary.forEach(function(entry){
-          var key = entry.name.replace(/_.*$/, '');
-          dictionary_sounds["audio/sfx/" + key] = true;
+          var sound_name = entry.name.replace(/_.*$/, '');
+          if(extra_config && extra_config.sounds){
+            var sound = extra_config.sounds[sound_name];
+            if(sound){
+              sound_name = sound.sound;
+            }
+          }
+          dictionary_sounds["audio/sfx/" + sound_name] = true;
+          found[sound_name] = true;          
         })
       }
 
@@ -12964,6 +12844,10 @@ module.exports = function storytimeisland_media(book, global_settings){
       
       all_images.push('images/page' + page.number + '.png');
     })
+
+    for(var i in found){
+      console.log(i);
+    }
 
     var keys = [];
     for(var p in dictionary_sounds){
@@ -13309,6 +13193,8 @@ module.exports = function storytimeisland_platform(){
         is_3d = false;
       }
     }
+
+    
   }
 
   return {
@@ -13510,7 +13396,6 @@ module.exports = function storytimeisland_teddy(selector, templates){
 
 
 
-
 require.alias("component-emitter/index.js", "storytimeislandbook/deps/emitter/index.js");
 require.alias("component-emitter/index.js", "emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
@@ -13537,15 +13422,6 @@ require.alias("component-transform-property/index.js", "binocarlos-pageturner/de
 require.alias("component-jquery/index.js", "binocarlos-pageturner/deps/jquery/index.js");
 
 require.alias("binocarlos-pageturner/index.js", "binocarlos-pageturner/index.js");
-require.alias("binocarlos-pagefader/index.js", "storytimeislandbook/deps/pagefader/index.js");
-require.alias("binocarlos-pagefader/index.js", "storytimeislandbook/deps/pagefader/index.js");
-require.alias("binocarlos-pagefader/index.js", "pagefader/index.js");
-require.alias("component-emitter/index.js", "binocarlos-pagefader/deps/emitter/index.js");
-require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
-
-require.alias("component-jquery/index.js", "binocarlos-pagefader/deps/jquery/index.js");
-
-require.alias("binocarlos-pagefader/index.js", "binocarlos-pagefader/index.js");
 require.alias("component-hammer.js/index.js", "storytimeislandbook/deps/hammer/index.js");
 require.alias("component-hammer.js/index.js", "hammer/index.js");
 

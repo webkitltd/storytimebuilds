@@ -118,12 +118,10 @@ program
     process.env.NODE_ENV = 'development';
 
     var commands = [
-      'createandroid Freddy com.storytimeisland.freddy',
-      'createandroid Frank com.storytimeisland.frank',
-      'createandroid Monsters com.iboard.monsters',
+      'createandroid Freddy FreddyTheFisherman com.storytimeisland.freddy',
+      'createandroid Frank FrankTheFireman com.storytimeisland.frank',
       'android storytimeisland/freddy Freddy',
-      'android storytimeisland/freddy Frank',
-      'android iboard/monsters Monsters'
+      'android storytimeisland/frank Frank'      
     ]
 
     run_commands(commands, function(){
@@ -227,6 +225,9 @@ program
 
     if(fs.existsSync(inputfolder + '/lastpage.html')){
       data.last_page_html = fs.readFileSync(inputfolder + '/lastpage.html', 'utf8');    
+    }
+    else{
+      data.last_page_html = '';
     }
 
     data.load(function(){
@@ -355,6 +356,10 @@ program
     ]
 
     _.each(templates, function(templatepath){
+
+      console.log('-------------------------------------------');
+      console.log('rendering: ' + templatepath);
+      console.dir(settings);
       var template = new BookTemplate(path.normalize(outputfolder + '/' + templatepath), {
         settings:settings
       })
@@ -364,6 +369,9 @@ program
       fs.writeFileSync(outputfolder + '/' + templatepath, code, 'utf8');
     })
 
+    _.each(icon_folders, function(icon_folder){
+
+    })
     
   })  
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name><%= settings.appname %></name>
+	<name><%= settings.apptitle %></name>
 	<comment></comment>
 	<projects>
 	</projects>

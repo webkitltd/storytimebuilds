@@ -10,5 +10,5 @@ lineSpacing=-4
 rightMargin=0
 leftMargin=0
 letterSpacing=0
-extra_config=var page = {};
-dictionary_length=1
+extra_config=var page = {	sounds:{						dragon:{			text:"dragon",			sound:"dragonwings"		}				}};
+dictionary_length=2
