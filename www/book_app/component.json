@@ -1,0 +1,27 @@
+{
+  "name": "storytimeislandbook",
+  "description": "A book for the storytimeisland series",
+  "version": "0.0.3",
+  "keywords": [],
+  "dependencies": {
+    "component/emitter": "*",
+    "component/jquery": "*",
+    "component/hammer.js": "*",
+    "component/gesture": "*",
+    "binocarlos/storytimeisland-book": "*",
+    "esundahl/tada": "*",
+    "esundahl/bounce": "*",
+    "brighthas/browser-type": "*"
+  },
+  "development": {},
+  "styles": [
+    "book.css"
+  ],
+  "scripts": [
+    "app.js",
+    "book.js",
+    "home.js",
+    "teddy.js"
+  ],
+  "remotes": []
+}
