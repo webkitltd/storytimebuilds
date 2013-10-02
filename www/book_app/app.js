@@ -51,7 +51,13 @@ module.exports = function storytimeisland_application(){
   // the media has loaded - tell buddy to hide
   // show the homepage
   // anmiate the teddy
+  var loaddone = false;
   book.on('media:loaded', function(){
+    if(loaddone){
+      return;
+    }
+
+    loaddone = true;
 
     setTimeout(function(){
       $('#homeloading').hide()

@@ -11166,8 +11166,8 @@ PageTurner.prototype.animate_index = function(index){
   var leafname = index>this.currentpage ? 'afterleaf' : 'beforeleaf';
 
   if(!this.is3d){
-    self.emit('animate', side);
-    self.emit('animated', side);
+    self.emit('animate', side, index);
+    self.emit('animated', side, index);
     this.load_page(index);
     return;
   }
@@ -11234,8 +11234,8 @@ PageTurner.prototype.animate_direction = function(direction, nextpage){
   var otherbase = this['base' + otherside];
 
   if(!this.is3d){
-    self.emit('animate', side);
-    self.emit('animated', side);
+    self.emit('animate', side, nextpage);
+    self.emit('animated', side, nextpage);
     this.load_page(nextpage);
     return;
   }
@@ -11256,10 +11256,10 @@ PageTurner.prototype.animate_direction = function(direction, nextpage){
   setAnimationTime(leaf, self.options.animtime);
   setRotation(leaf, side=='left' ? 180 : 0);
 
-  self.emit('animate', side);
+  self.emit('animate', side, nextpage);
 
   setTimeout(function(){
-    self.emit('animated', side);
+    self.emit('animated', side, nextpage);
     self.load_page(nextpage);
   }, self.options.animtime + 10)
 
@@ -11496,30 +11496,18 @@ module.exports = function storytimeisland_media(book){
     var soundcounter = 0;
 
     function success(){
-      console.log('media loaded');
+      
     }
 
     function media_error(e){
-      console.log('media error');
-      console.dir(e);
+      
     }
 
     function load_sound(soundsrc, nextsound){
       var theSound = null;
 
       if(window.$phonegap){
-        console.log('-------------------------------------------');
-        console.log('-------------------------------------------');
-        console.log('-------------------------------------------');
-        console.log('-------------------------------------------');
-        console.log('-------------------------------------------');
-        console.log('-------------------------------------------');
-        console.log('-------------------------------------------');
-        console.log('-------------------------------------------');
-
-        console.log('loading media: ' + soundsrc);
         var src = '/android_asset/www/' + soundsrc + '.mp3';
-        console.log(src);
         theSound = new Media(src, success, media_error);
       }
       else{
@@ -11553,6 +11541,8 @@ module.exports = function storytimeisland_media(book){
 
       load_sound(nextsound, load_next_sound);
     }
+    
+    var imgindex = 0;
 
     function load_next_image(){
       if(loadimages.length<=0){
@@ -11561,16 +11551,16 @@ module.exports = function storytimeisland_media(book){
       }
       var nextimage = loadimages.shift();
 
-      load_image(nextimage, load_next_image);
+      load_image(nextimage, function(){
+        self.emit('loaded:image', nextimage, imgindex);
+        imgindex++;
+        load_next_image();
+      });
     }
 
     load_next_sound();
     load_next_image();
   }
-
-  console.log('-------------------------------------------');
-  console.log('IN MEDIA');
-
 
   /*
   
@@ -12728,18 +12718,33 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     }, 1000)
   }
 
+  function parse_block(block){
+    var left = parseFloat(block.x);
+    var width = parseFloat(block.width);
+    var right = left + width;
+    var top = parseFloat(block.y);
+    var height = parseFloat(block.height);
+    var bottom = top + height;
+
+    return {
+      width:width,
+      height:height,
+      left:left,
+      right:right,
+      top:top,
+      bottom:bottom
+    }
+  }
+
   function find_dictionary(hit){
     var ret = null;
 
     for(var i=0; i<dict_array.length; i++){
       var block = dict_array[i];
 
-      var left = parseFloat(block.x);
-      var right = left + (parseFloat(block.width));
-      var top = parseFloat(block.y);
-      var bottom = top + (parseFloat(block.height));
+      var coords = parse_block(block);
 
-      if(hit.x>=left && hit.x<=right && hit.y>=top && hit.y<=bottom){
+      if(hit.x>=coords.left && hit.x<=coords.right && hit.y>=coords.top && hit.y<=coords.bottom){
         ret = block;
         break;
       }
@@ -12747,45 +12752,7 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     return ret;
   }
 
-  /*
-  
-    this function is run with a coords object (x,y) for the tap on the screen
-    
-  */
-  function dictionary_handle(evpos){
-
-    /*
-      
-      where they clicked in relation to the book on the screen
-      
-    */
-    var bookevpos = {
-      x:evpos.x - currentpos.x,
-      y:evpos.y - currentpos.y
-    }
-
-    /*
-    
-      the book coords scaled to match the original boundary from flash
-      
-    */
-    var adjusted_evpos = {
-      x:bookevpos.x * (1/currentsize.ratio),
-      y:bookevpos.y * (1/currentsize.ratio)
-    }
-
-    var offset = currentsize.dictionary_offset;
-
-    if(offset){
-      adjusted_evpos.x += offset;
-    }
-
-    var block = find_dictionary(adjusted_evpos);
-
-
-    if(!block){
-      return;
-    }
+  function render_block(block, evpos){
 
     /*
     
@@ -12839,9 +12806,78 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     dictionary_handle.emit('sound', mp3);
   }
 
+
+
+  /*
+  
+    this function is run with a coords object (x,y) for the tap on the screen
+    
+  */
+  function dictionary_handle(evpos){
+
+    /*
+      
+      where they clicked in relation to the book on the screen
+      
+    */
+    var bookevpos = {
+      x:evpos.x - currentpos.x,
+      y:evpos.y - currentpos.y
+    }
+
+    /*
+    
+      the book coords scaled to match the original boundary from flash
+      
+    */
+    var adjusted_evpos = {
+      x:bookevpos.x * (1/currentsize.ratio),
+      y:bookevpos.y * (1/currentsize.ratio)
+    }
+
+    var offset = currentsize.dictionary_offset;
+
+    if(offset){
+      adjusted_evpos.x += offset;
+    }
+
+    var block = find_dictionary(adjusted_evpos);
+
+
+    if(!block){
+      return;
+    }
+
+    render_block(block, evpos);
+  }
+
+  /*
+  
+    convert the given index of dictionary item into co-ords to trigger it
+    
+  */
+  function render_index(index){
+    var entry = dict_array[index];
+    var coords = parse_block(entry);
+
+    var x = coords.left + (coords.width/2);
+    var y = coords.top + (coords.height/2);
+
+    var trigger_coord = {
+      x:currentpos.x + (x * currentsize.ratio),
+      y:currentpos.y + (y * currentsize.ratio)
+    }
+
+    render_block(entry, trigger_coord);
+
+    dictionary_handle.emit('hint', entry, trigger_coord);
+  }
+
   dictionary_handle.reset = function(){
     $('.dictionarytab').remove();
   }
+
+  dictionary_handle.render_index = render_index;
 
   for(var i in Emitter.prototype){
     dictionary_handle[i] = Emitter.prototype[i];
@@ -12902,6 +12938,7 @@ module.exports = function storytimeisland_gallery(options){
     })
     holder.find('.badge').html(pageindex);
     $imageselem.append(holder);
+    holder.hide();
   }
 
   append_to.append($elem);
@@ -12910,6 +12947,10 @@ module.exports = function storytimeisland_gallery(options){
 
   var total_width = imageholder.width();
   var current_offset = 0;
+
+  gallery.enable_page = function(index){
+    $imageselem.children().eq(index).show();
+  }
 
   gallery.destroy = function(){
     $elem.remove();
@@ -13039,9 +13080,6 @@ module.exports = function storytimeisland_book(options){
   var activedictionary = null;
   var activehighlighter = null;
 
-  var dragging = null;
-  var animating = false;
-  var loading = false;
   var currentsize = {};
   var currentpos = {};
 
@@ -13100,40 +13138,38 @@ module.exports = function storytimeisland_book(options){
     perspective:perspective
   })
 
+  var gallery = Gallery({
+    pages:bookdata.pages,
+    append_to:container
+  });
+
+
+  book.loading = false;
+  book.dragging = false;
+  book.animating = false;
+
   book.pagecount = pagecount;
 
   var media = MediaLib(bookdata);
 
   var loading_status = {};
-  function checkloaded(){
-    if(loading_status.images && loading_status.sounds){
-      
-      /*
-  
-        sort out the DOM
-        
-      */
-      console.log('-------------------------------------------');
-      console.log('media');
-      book.emit('media:loaded');
-    }
-  }
 
   media.on('loaded:sounds', function(){
-    console.log('-------------------------------------------');
-    console.log('sounds');
     loading_status.sounds = true;
-    checkloaded();
   })
 
-  media.on('loaded:images', function(){
-    console.log('-------------------------------------------');
-    console.log('images');
-    loading_status.images = true;
-    checkloaded();
+  var images_loaded = 0;
+
+  media.on('loaded:image', function(src, index){
+    //loading_status.images = true;
+    images_loaded++;
+    gallery.enable_page(index);
+
+    if(images_loaded==5){
+      book.emit('media:loaded');
+    }
   })
 
-    
   /*
   
     HELPER FUNCTIONS
@@ -13167,7 +13203,7 @@ module.exports = function storytimeisland_book(options){
   }
 
   function taparrow(direction){
-    if(animating || loading){
+    if(book.animating || book.loading){
       book.triggernext = function(){
         book.animate_direction(direction);
       }
@@ -13213,13 +13249,6 @@ module.exports = function storytimeisland_book(options){
     
   */
 
-
-
-  var gallery = Gallery({
-    pages:bookdata.pages,
-    append_to:container
-  });
-
   gallery.$elem.hide();
 
   function open_gallery(){
@@ -13258,11 +13287,6 @@ module.exports = function storytimeisland_book(options){
     
   */
   book.load = function(options){
-
-    console.log('-------------------------------------------');
-    console.log('-------------------------------------------');
-    console.log('loading');
-    
     media.load(options);
   }
 
@@ -13368,7 +13392,7 @@ module.exports = function storytimeisland_book(options){
 
   book.on('loaded', function(index){
 
-    loading = false;
+    book.loading = false;
 
     if(shadowloaded){
       shadowelem.css({
@@ -13384,39 +13408,79 @@ module.exports = function storytimeisland_book(options){
       activedictionary.on('sound', function(mp3){
         media.playdictionarysound(mp3);
       })
-    }
 
-    if(options.play_speech() && index>0){
-      var html_string = html[index];
-      activehighlighter = TextHighlighter(html_string, bookdata.config.highlighters ? bookdata.config.highlighters[index] : []);
+      activedictionary.on('hint', function(entry, pos){
+        var popup = $('<div class="dictionaryhint"><img src="/build/storytimeislandbook/img/arrow.png" width=100 /></div>');
 
-      activehighlighter.elem.css({
-        position:'absolute',
-        left:bookelem.offset().left + 'px',
-        top:bookelem.offset().top + 'px'
+        popup.css({
+          left:pos.x + 'px',
+          top:pos.y + 'px'
+        })
+
+        $('body').append(popup);
+
+        setTimeout(function(){
+          popup.remove();
+        }, 2000);
       })
+    }
 
-      if(index!=currentindex){
-        activehighlighter.start();  
+    function playpage(){
+      if(options.play_speech() && index>0){
+        var html_string = html[index];
+        activehighlighter = TextHighlighter(html_string, bookdata.config.highlighters ? bookdata.config.highlighters[index] : []);
+
+        activehighlighter.elem.css({
+          position:'absolute',
+          left:bookelem.offset().left + 'px',
+          top:bookelem.offset().top + 'px'
+        })
+
+        if(index!=currentindex){
+          activehighlighter.start();  
+        }
+        bookelem.append(activehighlighter.elem);
+        activehighlighter.elem.width(currentsize.width).height(currentsize.height);
       }
-      bookelem.append(activehighlighter.elem);
-      activehighlighter.elem.width(currentsize.width).height(currentsize.height);
-    }
 
-    if(book.triggernext){
-      book.triggernext();
-      book.triggernext = null;
-    }
-    else if(index!=currentindex){
-      book.emit('view:page', index);
-    }
+      if(book.triggernext){
+        book.triggernext();
+        book.triggernext = null;
+      }
+      else if(index!=currentindex){
+        book.emit('view:page', index);
+      }
 
-    gallery.set_current_page(index);
+      gallery.set_current_page(index);
 
-    currentindex = index;
+      currentindex = index;
+    }
+    
+
+    if(index==1 && !dictionaryhint && activedictionary){
+      
+      activedictionary.render_index(0);
+
+      setTimeout(function(){
+        activedictionary.render_index(1);
+      }, 500)
+
+      setTimeout(function(){
+        activedictionary.render_index(2);
+      }, 1000)
+
+      setTimeout(function(){
+        playpage();
+      }, 3000)
+
+      dictionaryhint = true;
+    }
+    else{
+      playpage();
+    }
   })
 
-  book.on('animate', function(side){
+  book.on('animate', function(side, index){
 
     if(activedictionary){
       activedictionary.reset();
@@ -13426,34 +13490,16 @@ module.exports = function storytimeisland_book(options){
       activehighlighter.reset();
     }
 
-    if(book.currentpage==1 && side=='left'){
-      apply_shadow(0);
-    }
-    else if(book.currentpage==pagecount-2 && side=='right'){
-      apply_shadow(pagecount-1);
-    }
-    else if(book.currentpage==pagecount-1){
-      lastpageelem.hide();
-    }
-
-    animating = true;
+    book.animating = true;
 
     media.stopsounds();
   })
 
-  book.on('animated', function(side){
+  book.on('animated', function(side, index){
 
-    if(book.currentpage==0 && side=='right'){
-      apply_shadow(1);
-    }
-    else if(book.currentpage==pagecount-1 && side=='left'){
-      apply_shadow(pagecount-2);
-    }
-    else{
-      //apply_shadow(side);  
-    }
+    book.animating = false;
 
-    animating = false;
+    apply_shadow(index);
 
   })
 
@@ -13462,8 +13508,12 @@ module.exports = function storytimeisland_book(options){
     
   })
 
+  // have we shown the dictionary hint arrow?
+  var dictionaryhint = false;
+
   book.on('load', function(index){
-    loading = true;
+    book.loading = true;
+
   })
 
   book.on('view:page', function(index){
@@ -13495,24 +13545,24 @@ module.exports = function storytimeisland_book(options){
     tap_max_distance:9
   })
 
-  hammertime.ondragstart = function(ev){
-    dragging = true;
+  hammertime.ondragstart = book.ondragstart = function(ev){
+    book.dragging = true;
   }
 
-  hammertime.ondrag = function(ev){
-    if(!dragging){
+  hammertime.ondrag = book.ondrag = function(ev){
+    if(!book.dragging){
       return;
     }
 
     if(ev.distance>=15){
 
-      dragging = false;
+      book.dragging = false;
 
       if(gallery.active){
         gallery.animate(ev.direction=='left' ? 1 : -1);
       }
       else{
-        if(animating || loading){
+        if(book.animating || book.loading){
           book.triggernext = function(){
             book.animate_direction(ev.direction=='left' ? 1 : -1);
           }
@@ -13526,11 +13576,11 @@ module.exports = function storytimeisland_book(options){
     }
   }
 
-  hammertime.ondragend = function(ev){
-    dragging = false;
+  hammertime.ondragend = book.ondragend = function(ev){
+    book.dragging = false;
   }
 
-  hammertime.ontap = function(ev){
+  hammertime.ontap = book.ontap = function(ev){
     if(gallery.active){
       gallery.tap(ev);
       return;
@@ -13660,7 +13710,13 @@ module.exports = function storytimeisland_application(){
   // the media has loaded - tell buddy to hide
   // show the homepage
   // anmiate the teddy
+  var loaddone = false;
   book.on('media:loaded', function(){
+    if(loaddone){
+      return;
+    }
+
+    loaddone = true;
 
     setTimeout(function(){
       $('#homeloading').hide()
@@ -13919,7 +13975,8 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
   }
 
   var bodytap = new Hammer($('body').get(0), {
-    tap_max_distance:30
+    drag_min_distance:15,
+    tap_max_distance:14
   })
 
   bodytap.ontap = function(ev){
@@ -13940,6 +13997,19 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
     
   }
 
+
+  bodytap.ondragstart = function(ev){
+    book.ondragstart(ev);
+  }
+
+  bodytap.ondrag = function(ev){
+    book.ondrag(ev);
+  }
+
+  bodytap.ondragend = function(ev){
+    book.ondragend(ev);
+  }
+
   if(browser.type=='mozilla'){
     $('.leftarrow').click(left_arrow_click);
     $('.rightarrow').click(right_arrow_click);
@@ -13948,130 +14018,6 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
   }
 
   return book;
-
-/*
-    var teddy = $(elem).closest('#teddybutton');
-
-    if(teddy.length>0){
-      clickteddy();
-      return;
-    }
-
-    var home = $(elem).closest('#homebutton');
-
-    if(home.length>0){
-      clickhome();
-      return;
-    }
-
-    if(gallery.active){
-      gallery.tap(ev);
-      return;
-    }
-
-    if($(elem).hasClass('arrow')){
-      taparrow($(elem));
-      return;
-    }
-    else{
-*/     
-
-
-
-    /*
-    if(gallery.active && ev.direction=='up'){
-      close_gallery();
-      return;
-    }*/
-
-
-
-
-
-  /*
-  
-    GALLERY
-    
-
-  var gallery = Gallery({
-    pages:bookdata.pages,
-    append_to:bookelem.parent()
-  });
-
-  gallery.on('loadpage', function(index){
-    close_gallery();
-    if(index==0){
-      apply_shadow(0);
-
-    }
-    else if(index==pagecount-1){
-      apply_shadow(pagecount-1);
-    }
-    $('#lastpagehtml').hide();
-    book.animate_index(index);
-  })
-
-  function open_gallery(){
-    gallery.$elem.css({
-      top:'0px'
-    })
-    setTimeout(function(){
-      gallery.active = true;
-      //$('#homebutton').show();
-      //$('#teddybutton .normal').hide();
-      //$('#teddybutton .highlight').show();
-    }, 10)
-  }
-
-  function close_gallery(){
-    gallery.$elem.css({
-      top:'-120px'
-    })
-    setTimeout(function(){
-      gallery.active = false;
-      //$('#homebutton').hide();
-      //$('#teddybutton .normal').show();
-      //$('#teddybutton .highlight').hide();
-    }, 10)
-    
-    
-  }
-
-  function taparrow(arrow){
-    if(animating || loading){
-      book.triggernext = function(){
-        book.animate_direction(arrow.hasClass('leftarrow') ? -1 : 1);
-      }
-      return;
-    }
-    else{
-      book.animate_direction(arrow.hasClass('leftarrow') ? -1 : 1);
-    }
-  }
-
-  function clickteddy(){
-    if(gallery.active){
-      close_gallery();
-    }
-    else{
-      open_gallery(); 
-    }
-  }
-
-  function clickhome(){
-    close_gallery();
-    setTimeout(function(){
-      book_factory.emit('gohome');  
-    },500)
-    
-  }
-
-  var leftarrowelem = $('.leftarrow');
-  var rightarrowelem = $('.rightarrow');
-
-
-*/
-
 }
 
 

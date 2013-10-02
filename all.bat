@@ -4,3 +4,6 @@ node bin\book.js publish C:\Users\kai\Dropbox\books\PUBLISH\source\freddy C:\Use
 node bin\book.js publish C:\Users\kai\Dropbox\books\PUBLISH\source\frank C:\Users\kai\Dropbox\books\PUBLISH\html\frank
 node bin\book.js android C:\Users\kai\Dropbox\books\PUBLISH\html\freddy C:\Users\kai\Dropbox\books\PUBLISH\android\freddy
 node bin\book.js android C:\Users\kai\Dropbox\books\PUBLISH\html\frank C:\Users\kai\Dropbox\books\PUBLISH\android\frank
+
+
+node bin\book.js serve C:\Users\kai\Dropbox\books\PUBLISH\html\freddy

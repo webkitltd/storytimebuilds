@@ -124,7 +124,8 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
   }
 
   var bodytap = new Hammer($('body').get(0), {
-    tap_max_distance:30
+    drag_min_distance:15,
+    tap_max_distance:14
   })
 
   bodytap.ontap = function(ev){
@@ -145,6 +146,19 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
     
   }
 
+
+  bodytap.ondragstart = function(ev){
+    book.ondragstart(ev);
+  }
+
+  bodytap.ondrag = function(ev){
+    book.ondrag(ev);
+  }
+
+  bodytap.ondragend = function(ev){
+    book.ondragend(ev);
+  }
+
   if(browser.type=='mozilla'){
     $('.leftarrow').click(left_arrow_click);
     $('.rightarrow').click(right_arrow_click);
@@ -153,129 +167,5 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
   }
 
   return book;
-
-/*
-    var teddy = $(elem).closest('#teddybutton');
-
-    if(teddy.length>0){
-      clickteddy();
-      return;
-    }
-
-    var home = $(elem).closest('#homebutton');
-
-    if(home.length>0){
-      clickhome();
-      return;
-    }
-
-    if(gallery.active){
-      gallery.tap(ev);
-      return;
-    }
-
-    if($(elem).hasClass('arrow')){
-      taparrow($(elem));
-      return;
-    }
-    else{
-*/     
-
-
-
-    /*
-    if(gallery.active && ev.direction=='up'){
-      close_gallery();
-      return;
-    }*/
-
-
-
-
-
-  /*
-  
-    GALLERY
-    
-
-  var gallery = Gallery({
-    pages:bookdata.pages,
-    append_to:bookelem.parent()
-  });
-
-  gallery.on('loadpage', function(index){
-    close_gallery();
-    if(index==0){
-      apply_shadow(0);
-
-    }
-    else if(index==pagecount-1){
-      apply_shadow(pagecount-1);
-    }
-    $('#lastpagehtml').hide();
-    book.animate_index(index);
-  })
-
-  function open_gallery(){
-    gallery.$elem.css({
-      top:'0px'
-    })
-    setTimeout(function(){
-      gallery.active = true;
-      //$('#homebutton').show();
-      //$('#teddybutton .normal').hide();
-      //$('#teddybutton .highlight').show();
-    }, 10)
-  }
-
-  function close_gallery(){
-    gallery.$elem.css({
-      top:'-120px'
-    })
-    setTimeout(function(){
-      gallery.active = false;
-      //$('#homebutton').hide();
-      //$('#teddybutton .normal').show();
-      //$('#teddybutton .highlight').hide();
-    }, 10)
-    
-    
-  }
-
-  function taparrow(arrow){
-    if(animating || loading){
-      book.triggernext = function(){
-        book.animate_direction(arrow.hasClass('leftarrow') ? -1 : 1);
-      }
-      return;
-    }
-    else{
-      book.animate_direction(arrow.hasClass('leftarrow') ? -1 : 1);
-    }
-  }
-
-  function clickteddy(){
-    if(gallery.active){
-      close_gallery();
-    }
-    else{
-      open_gallery(); 
-    }
-  }
-
-  function clickhome(){
-    close_gallery();
-    setTimeout(function(){
-      book_factory.emit('gohome');  
-    },500)
-    
-  }
-
-  var leftarrowelem = $('.leftarrow');
-  var rightarrowelem = $('.rightarrow');
-
-
-*/
-
 }
 

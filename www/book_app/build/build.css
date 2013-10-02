@@ -412,6 +412,11 @@ html,body{
  src: url("storytimeislandbook/./sassoon.otf") format('opentype');
 }
 
+.dictionaryhint{
+  position:absolute;
+  z-index:2000;
+}
+
 #bookviewer{
   display:none;
 }
