@@ -12807,7 +12807,6 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
   }
 
 
-
   /*
   
     this function is run with a coords object (x,y) for the tap on the screen
@@ -12866,6 +12865,12 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     var trigger_coord = {
       x:currentpos.x + (x * currentsize.ratio),
       y:currentpos.y + (y * currentsize.ratio)
+    }
+
+    var offset = currentsize.dictionary_offset;
+
+    if(offset){
+      trigger_coord.x -= (offset * currentsize.ratio);
     }
 
     render_block(entry, trigger_coord);
