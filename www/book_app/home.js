@@ -57,9 +57,14 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
       return;
     }
 
-    $('#frontpageimage').addClass('animated').addClass('tada');
+    $('#bookwrapper').addClass('animated').addClass('tada');
     setTimeout(function(){
-      $('#frontpageimage').removeClass('animated').removeClass('tada');
+      $('#bookwrapper').removeClass('animated').removeClass('tada');
+
+      // remove the teddy once hes done his bit
+      $('#teddy').fadeOut(1000, function(){
+        $('#teddy').remove();
+      })
     }, 2000)
 
 

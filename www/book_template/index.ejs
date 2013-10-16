@@ -23,19 +23,14 @@
 </head>
 <body>
   
+
+  <div id="bookviewer">
+      
+  </div>
+
   <div id="home">
 
   </div>
-
-  <table width=100% height=100% cellspacing=0 cellpadding=0>
-    <tr>
-      <td align=center valign=middle>
-        <div id="bookviewer">
-            
-        </div>
-      </td>
-    </tr>
-  </table>
 
   <div class="arrow leftarrow"></div>
   <div class="arrow rightarrow"></div>
@@ -61,31 +56,20 @@
         </tr>
       </table>
     </div>
-    <div id="homeloaded" style="display:none;">
-      <table width="100%">
-        <tr>
-          <td colspan=3 align=center height=1>
-            <img id="logoimage" src="build/storytimeislandbook/img/logo.png" />
-          </td>
-        </tr>
-        <tr>
-          <td width=50% align=right valign=top>
-            <div id="nobubblebutton" class="pointercursor tapbutton">
-              <img id="nobubbleimage" src="build/storytimeislandbook/img/nobubble.png" /><br /><br />
-              <div id="nobubbletab" class="homepagetab">grownup reads</div>
-            </div>
-          </td>
-          <td align=center width=1 id="booktd" style="padding-top:0px;">
-            <img id="frontpageimage" class="pointercursor boxshadow tapbutton" src="icons/frontpage.png" />
-          </td>
-          <td width=50% align=left valign=top>
-            <div id="bubblebutton" class="pointercursor tapbutton">
-              <img id="bubbleimage" src="build/storytimeislandbook/img/bubble.png" /><br /><br />
-              <div id="bubbletab" class="homepagetab">reads itself</div>
-            </div>
-          </td>
-        </tr>
-      </table>
+    <div id="homeloaded" style="display:none;width:100%:height:100%;">
+      <img id="logoimage" src="build/storytimeislandbook/img/logo.png" />
+
+      <div id="bubbleholders">
+        <div id="bubblebutton" class="pointercursor tapbutton">
+          <img id="bubbleimage" src="build/storytimeislandbook/img/bubble.png" /><br /><br />
+          <div id="bubbletab" class="homepagetab">reads itself</div>
+        </div>
+        <div id="nobubblebutton" class="pointercursor tapbutton">
+          <img id="nobubbleimage" src="build/storytimeislandbook/img/nobubble.png" /><br /><br />
+          <div id="nobubbletab" class="homepagetab">grownup reads</div>
+        </div>
+      </div>
+
       <div id="teddyholder"></div>
     </div>
   </script>

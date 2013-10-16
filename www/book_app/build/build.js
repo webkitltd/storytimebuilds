@@ -10912,10 +10912,325 @@ for (var i = 0; i < styles.length; i++) {
 }
 
 });
+require.register("pgherveou-prefix/index.js", function(exports, require, module){
+// module globals
+
+var prefixes = ['webkit','Moz','ms','O']
+  , len = prefixes.length
+  , p = document.createElement('p')
+  , style = p.style
+  , capitalize = function (str) {return str.charAt(0).toUpperCase() + str.slice(1);}
+  , dasherize = function(str) {
+      return str.replace(/([A-Z])/g, function(str,m1) {
+        return '-' + m1.toLowerCase();
+      });
+    };
+
+// nullify p to release dom node
+p = null;
+
+/**
+ * get prefix for dom style
+ *
+ * example
+ *   prefix('transform') // webkitTransform
+ *   prefix('transform', true) // -webkit-transform
+ *
+ * @param  {String}   ppty dom style
+ * @param  {Boolean}  dasherize
+ * @return {String}   prefixed ppty
+ * @api public
+ */
+
+module.exports = function(ppty, dasherized) {
+  var Ppty, name, Name;
+
+  // test without prefix
+  if (style[ppty] !== undefined) {
+    if (!dasherized) return ppty;
+    return dasherize(ppty);
+  }
+
+  // test with prefix
+  Ppty = capitalize(ppty);
+  for (i = 0; i < len; i++) {
+    name = prefixes[i] + Ppty;
+    if (style[name] !== undefined) {
+      if (!dasherized) return name;
+      return '-' + prefixes[i].toLowerCase() + '-' + dasherize(ppty);
+    }
+  }
+
+  // not found return empty string
+  return '';
+};
+
+});
+require.register("pgherveou-transitionend/index.js", function(exports, require, module){
+/**
+ * module dependencies
+ */
+
+var prefix = require('prefix');
+
+// transitionend mapping
+// src: https://github.com/twitter/bootstrap/issues/2870
+
+var transEndEventNames = {
+    'webkitTransition' : 'webkitTransitionEnd',
+    'WebkitTransition' : 'webkitTransitionEnd',
+    'MozTransition'    : 'transitionend',
+    'OTransition'      : 'oTransitionEnd',
+    'msTransition'     : 'MSTransitionEnd',
+    'transition'       : 'transitionend'
+};
+
+module.exports = transEndEventNames[prefix('transition')];
+});
+require.register("anthonyshort-has-transitions/index.js", function(exports, require, module){
+/**
+ * This will store the property that the current
+ * browser uses for transitionDuration
+ */
+var property;
+
+/**
+ * The properties we'll check on an element
+ * to determine if it actually has transitions
+ * We use duration as this is the only property
+ * needed to technically have transitions
+ * @type {Array}
+ */
+var types = [
+  "transitionDuration",
+  "MozTransitionDuration",
+  "webkitTransitionDuration"
+];
+
+/**
+ * Determine the correct property for this browser
+ * just once so we done need to check every time
+ */
+while(types.length) {
+  var type = types.shift();
+  if(type in document.body.style) {
+    property = type;
+  }
+}
+
+/**
+ * Determine if the browser supports transitions or
+ * if an element has transitions at all.
+ * @param  {Element}  el Optional. Returns browser support if not included
+ * @return {Boolean}
+ */
+function hasTransitions(el){
+  if(!property) {
+    return false; // No browser support for transitions
+  }
+  if(!el) {
+    return property != null; // We just want to know if browsers support it
+  }
+  var duration = getComputedStyle(el)[property];
+  return duration !== "" && parseFloat(duration) !== 0; // Does this element have transitions?
+}
+
+module.exports = hasTransitions;
+});
+require.register("component-event/index.js", function(exports, require, module){
+
+/**
+ * Bind `el` event `type` to `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.bind = function(el, type, fn, capture){
+  if (el.addEventListener) {
+    el.addEventListener(type, fn, capture || false);
+  } else {
+    el.attachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+/**
+ * Unbind `el` event `type`'s callback `fn`.
+ *
+ * @param {Element} el
+ * @param {String} type
+ * @param {Function} fn
+ * @param {Boolean} capture
+ * @return {Function}
+ * @api public
+ */
+
+exports.unbind = function(el, type, fn, capture){
+  if (el.removeEventListener) {
+    el.removeEventListener(type, fn, capture || false);
+  } else {
+    el.detachEvent('on' + type, fn);
+  }
+  return fn;
+};
+
+});
+require.register("anthonyshort-css-emitter/index.js", function(exports, require, module){
+/**
+ * Module Dependencies
+ */
+
+var events = require('event');
+
+// CSS events
+
+var watch = [
+  'transitionend'
+, 'webkitTransitionEnd'
+, 'oTransitionEnd'
+, 'MSTransitionEnd'
+, 'animationend'
+, 'webkitAnimationEnd'
+, 'oAnimationEnd'
+, 'MSAnimationEnd'
+];
+
+/**
+ * Expose `CSSnext`
+ */
+
+module.exports = CssEmitter;
+
+/**
+ * Initialize a new `CssEmitter`
+ *
+ */
+
+function CssEmitter(element){
+  if (!(this instanceof CssEmitter)) return new CssEmitter(element);
+  this.el = element;
+}
+
+/**
+ * Bind CSS events.
+ *
+ * @api public
+ */
+
+CssEmitter.prototype.bind = function(fn){
+  for (var i=0; i < watch.length; i++) {
+    events.bind(this.el, watch[i], fn);
+  }
+  return this;
+};
+
+/**
+ * Unbind CSS events
+ * 
+ * @api public
+ */
+
+CssEmitter.prototype.unbind = function(fn){
+  for (var i=0; i < watch.length; i++) {
+    events.unbind(this.el, watch[i], fn);
+  }
+  return this;
+};
+
+/**
+ * Fire callback only once
+ * 
+ * @api public
+ */
+
+CssEmitter.prototype.once = function(fn){
+  var self = this;
+  function on(){
+    self.unbind(on);
+    fn.apply(self.el, arguments);
+  }
+  self.bind(on);
+  return this;
+};
+
+
+});
+require.register("anthonyshort-after-transition/index.js", function(exports, require, module){
+var hasTransitions = require('has-transitions');
+var emitter = require('css-emitter');
+
+function afterTransition(el, callback) {
+  if(hasTransitions(el)) {
+    return emitter(el).bind(callback);
+  }
+  return callback.apply(el);
+};
+
+afterTransition.once = function(el, callback) {
+  afterTransition(el, function fn(){
+    callback.apply(el);
+    emitter(el).unbind(fn);
+  });
+};
+
+module.exports = afterTransition;
+});
 require.register("binocarlos-pageturner/index.js", function(exports, require, module){
 /*
 
-  PageHammer
+  Page Turner
+
+
+Turning Pair (a single page turn = 2 leafs turning at the same time)
+One turns till halfway then triggers the other leaf (which is vertical)
+to complete it's turn
+                        |
+                        |----------
+                        |         |       
+                        \        /
+                        -        _ ----- Turning Leaf
+                        -\      /_       (one of the 4 hot pages 
+                        - \    / _       prev-right + current-left
+                        -  \  /  _       next-left + current-right
+    -----------------------------_-------------------
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                   -   |    _                  |---- Base leaf 
+    |                   -   |    _                  |     single sided 
+    |                   -   |    _                  |     leafs from the
+    |                   -   |    _                  |     prev / next pages
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                    \  |  /                    |
+    |                     \ | /                     |
+    |                      \|/                      |
+    -------------------------------------------------
+
+
+    -------------------------------------------------
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    -------------------------------------------------
+    
+  
   
 */
 
@@ -10923,6 +11238,8 @@ var Emitter = require('emitter');
 var $ = require('jquery');
 var transform = require('transform-property');
 var has3d = require('has-translate3d');
+var transEndEventName = require("transitionend");
+var afterTransition = require('after-transition');
 
 var template = require('./templates/booktemplate.js');
 
@@ -10950,7 +11267,7 @@ function PageTurner(options){
   Emitter.call(this);
 
   this.options = options;
-  this.is3d = options.has3d;
+  this.is3d = has3d && options.has3d;
 
   this.page_html = [];
   this.currentpage = 0;
@@ -10982,10 +11299,128 @@ PageTurner.prototype.render = function(){
 
   this.book.html(template);
 
-  this.base = this.book.find('#base');
-  this.leaves = this.book.find('#leaves');
+  /*
+  
+    #base
 
-  setPerspective(this.leaves, this.options.perspective);
+    the left and right pages for the prev and next pages
+
+    -------------------------------------------------
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |       prev left       |       next right      |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    -------------------------------------------------
+    
+    
+  */
+  this.base = this.book.find('#base');
+
+  /*
+  
+    #current
+
+    the leaves that we see as the book
+
+    -------------------------------------------------
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |      front left       |     front right       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    -------------------------------------------------
+    
+    
+  */
+  this.fronts = this.book.find('#fronts');  
+
+  /*
+  
+    #leaves
+
+    the DOM element that holds our page turning leaves
+
+    we have 2 leaves '#back' and '#forward' - each meaning a direction the book is turning
+
+    -------------------------------------------------
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |      back left        |      back right       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    |                       |                       |
+    -------------------------------------------------
+    
+    
+  */
+  this.backs = this.book.find('#backs');
+
+  /*
+
+
+                                 the edge is 90 degrees so it shows when the page is flat
+                                  |       
+                        -        _
+                        -\      /_ 
+                        - \    / _  
+                        -  \  /  _
+    -----------------------------_-------------------
+    |                   -   |    _                  |
+    |                   -   |    _                  | 
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                   -   |    _                  |
+    |                    \  |  /                    |
+    |                     \ | /                     |
+    |                      \|/                      |
+    -------------------------------------------------
+    
+    
+  */
+  this.edges = this.book.find('#edges');
+
+/*
+  this.frontleafelems = $('<div class="leafholder maintain3d"></div>');
+  this.backleafelems = $('<div class="leafholder maintain3d"></div>');
+*/
+
+  setPerspective(this.fronts, this.options.perspective);
+  setPerspective(this.backs, this.options.perspective);
+  //setPerspective(this.edges, this.options.perspective);
+
+/*  
+  this.leaves.append(this.frontleafelems);
+  this.leaves.append(this.backleafelems);
+*/
 
   this.resize();
   this.load_page(this.options.startpage || 0);
@@ -11003,6 +11438,53 @@ PageTurner.prototype.render = function(){
   })
 }
 
+PageTurner.prototype.build_edges = function(){
+
+  var self = this;
+  if(this.leftedge){
+    this.leftedge.remove();
+  }
+
+  if(this.rightedge){
+    this.rightedge.remove();
+  }
+
+  var leftedgeelem = $('<div class="leftedge leafholder maintain3d"><div class="leafedge"></div></div>').css({
+    'z-index':1000
+  })
+  var rightedgeelem = $('<div class="rightedge leafholder maintain3d"><div class="leafedge"></div></div>').css({
+    'z-index':1001
+  })
+
+  this.leftedge = leftedgeelem;
+  this.rightedge = rightedgeelem;
+
+  self.leftedge.css({
+    opacity:0
+  })
+
+  self.rightedge.css({
+    opacity:0
+  })
+
+  var edgewidth = this.options.edgewidth || 10;
+  var leftrotatededge = this.leftedge.find('.leafedge').css({
+    width:edgewidth + 'px',
+    left:-(edgewidth/2) + 'px'
+  })
+
+  var rightrotatededge = this.rightedge.find('.leafedge').css({
+    width:edgewidth + 'px',
+    right:-(edgewidth/2) + 'px'
+  })
+
+  setRotation(leftrotatededge, 90);
+  setRotation(rightrotatededge, 90);
+
+  this.backs.append(this.rightedge);
+  this.backs.append(this.leftedge);
+}
+
 PageTurner.prototype.resize = function(){
   this.size = {
     width:this.book.width(),
@@ -11012,7 +11494,8 @@ PageTurner.prototype.resize = function(){
   this.base.width(this.size.width).height(this.size.height);
 
   if(this.is3d){
-    this.leaves.width(this.size.width).height(this.size.height);
+    this.fronts.width(this.size.width).height(this.size.height);
+    this.backs.width(this.size.width).height(this.size.height);
     this.book.find('.leaf, .leafholder').width(this.size.width).height(this.size.height);  
   }
   
@@ -11026,7 +11509,9 @@ PageTurner.prototype.get_page_html = function(index){
 
 /*
 
-  gets the set index of page written into the GUI
+  create the DOM structure ready for page X to turn +/- 1
+
+
   
 */
 PageTurner.prototype.load_page = function(index){
@@ -11035,75 +11520,100 @@ PageTurner.prototype.load_page = function(index){
   self.emit('load', index);
   this.currentpage = index;
 
-  this.baseleft = this.create_leaf('left', this.get_page_html(this.is3d ? index-1 : index));
-  this.baseright = this.create_leaf('right', this.get_page_html(this.is3d ? index+1 : index));
+  /*
+  
+    create the base leaves
 
+    if we are not 3d then these are the actual pages
+    
+  */
+  this.baseleft = this.create_leaf('left', this.get_page_html(this.is3d ? index-1 : index)).css({
+    display:'block'
+  })
+  this.baseright = this.create_leaf('right', this.get_page_html(this.is3d ? index+1 : index)).css({
+    display:'block'
+  })
+
+  
   if(this.is3d){
-    this.leafleft = this.create_double_leaf(this.page_html[index-1], this.page_html[index]);
-    this.leafright = this.create_double_leaf(this.page_html[index], this.page_html[index+1]);
+
+    this.leftback = this.create_leaf('right', this.get_page_html(index-1), true).css({
+      display:'block'
+    })
+    this.leftfront = this.create_leaf('left', this.get_page_html(index), true).css({
+      display:'block'
+    })
+
+    this.rightback = this.create_leaf('left', this.get_page_html(index+1), true).css({
+      display:'block'
+    })
+    this.rightfront = this.create_leaf('right', this.get_page_html(index), true).css({
+      display:'block'
+    })
+
+    //this.leafleft = this.create_double_leaf(this.page_html[index-1], this.page_html[index]);
+    //this.leafright = this.create_double_leaf(this.page_html[index], this.page_html[index+1]);
   }
   
-  var existingbase = this.base.find('.leaf');
-  var existingleaves = this.leaves.find('.leafholder');
 
-  this.baseright.css({
-    display:'block'
-  })
-  this.baseleft.css({
-    display:'block'
-  })
+  var existingbase = this.base.find('.leaf');
+
+  var frontexistingleaves = this.fronts.find('.leaf');
+  var backexistingleaves = this.backs.find('.leaf');
+
   this.base.prepend(this.baseright).prepend(this.baseleft);
 
-  self.processmask(this.baseleft, 1);
-  self.processmask(this.baseright, 1);
+  self.processmask(this.baseleft, 0);
+  self.processmask(this.baseright, 0);
 
   if(this.is3d){
-    this.leafright.css({
-      display:'block'
-    })
-    this.leafleft.css({
-      display:'block'
-    })
 
-    this.leaves.prepend(this.leafright).prepend(this.leafleft);
+    self.processmask(this.leftfront, 0);
+    self.processmask(this.rightfront, 0);
+    self.processmask(this.leftback, 0);
+    self.processmask(this.rightback, 0);
 
-    setRotation(this.leafright, 180);
-
-    this.leafleft.find('.leaf').each(function(i){
-      self.processmask($(this), 1);
+    setRotation(this.leftback, -90.1);
+    setRotation(this.rightback, 89.9);
+    this.leftback.css({
+      opacity:0
     })
-
-    this.leafright.find('.leaf').each(function(i){
-      self.processmask($(this));
+    this.rightback.css({
+      opacity:0
     })
+    
+    
+    this.fronts.append(this.rightfront);
+    this.fronts.append(this.leftfront)
+
+    
+    this.backs.append(this.rightback);
+    this.backs.append(this.leftback)
   }
+
 
   setTimeout(function(){
 
-    existingbase.fadeOut(200, function(){
+    existingbase.fadeOut(100, function(){
       existingbase.remove();
     })
 
     if(self.is3d){
-      existingleaves.fadeOut(200, function(){
-        existingleaves.remove();
+      frontexistingleaves.fadeOut(100, function(){
+        frontexistingleaves.remove();
       })
-      
-      
-      self.leafright.css({
-        display:'block'
-      })
-
-      self.leafleft.css({
-        display:'block'
+      backexistingleaves.fadeOut(100, function(){
+        backexistingleaves.remove();
       })
     }
 
     setTimeout(function(){
       self.active = true;
       self.emit('loaded', index);
-    }, 200)
-  }, 200);
+    }, 100)
+  }, 500);
+
+  this.build_edges();
 }
 
 PageTurner.prototype.processmask = function(leaf, val){
@@ -11126,61 +11636,15 @@ PageTurner.prototype.processmask = function(leaf, val){
   create an element that is one page of content masked either left or right
   
 */
-PageTurner.prototype.create_leaf = function(side, html, domask){
+PageTurner.prototype.create_leaf = function(side, html, withedge){
   var leaf = $('<div class="leaf nobackside"><div class="content">' + html + '</div></div>');
   if(this.options.apply_pageclass){
     leaf.find('.content').addClass(this.options.apply_pageclass);
   }
   leaf.attr('data-side', side);
   leaf.width(this.size.width).height(this.size.height);
-  return leaf;
-}
-
-PageTurner.prototype.create_double_leaf = function(beforehtml, afterhtml){
-  var beforeleaf = this.create_leaf('right', beforehtml, true);
-  var afterleaf = this.create_leaf('left', afterhtml, true);
-  beforeleaf.addClass('beforeleaf');
-  afterleaf.addClass('afterleaf');
-  var double_leaf = $('<div class="leafholder maintain3d"></div>');  
-  var edge = $('<div class="nobackside leafedge"></div>');  
-  double_leaf.width(this.size.width).height(this.size.height);
-  double_leaf.append(afterleaf).append(beforeleaf);
-  double_leaf.append(edge);
-  double_leaf.before = beforeleaf;
-  double_leaf.after = afterleaf;
-  setRotation(beforeleaf, 180);
-  setRotation(edge, -90);
-  return double_leaf;
-}
-
-/*
-
-  animate the book after having shifted the pages around so a non-sequential page is the target
   
-*/
-PageTurner.prototype.animate_index = function(index){
-  var self = this;
-
-  var side = index>this.currentpage ? 'right' : 'left';
-  var direction = index>this.currentpage ? 1 : -1;
-  var leafname = index>this.currentpage ? 'afterleaf' : 'beforeleaf';
-
-  if(!this.is3d){
-    self.emit('animate', side, index);
-    self.emit('animated', side, index);
-    this.load_page(index);
-    return;
-  }
-
-  var basehtml = this.get_page_html(index);
-  var base = this['base' + side];
-  base.find('.content').html(basehtml);
-
-  var leaf = this['leaf' + side];
-  leaf.find('.' + leafname + ' .content').html(basehtml);
-  setTimeout(function(){
-    self.animate_direction(direction, index);
-  }, 500)
+  return leaf;
 }
 
 
@@ -11217,7 +11681,6 @@ PageTurner.prototype.animate_direction = function(direction, nextpage){
     return;
   }
 
-  
   if(arguments.length<=1){
     nextpage = this.currentpage + direction;  
 
@@ -11228,10 +11691,6 @@ PageTurner.prototype.animate_direction = function(direction, nextpage){
 
   var side = direction<0 ? 'left' : 'right';
   var otherside = (side=='left' ? 'right' : 'left');
-  var leaf = this['leaf' + side];
-  var otherleaf = this['leaf' + otherside];
-  var base = this['base' + side];
-  var otherbase = this['base' + otherside];
 
   if(!this.is3d){
     self.emit('animate', side, nextpage);
@@ -11240,31 +11699,155 @@ PageTurner.prototype.animate_direction = function(direction, nextpage){
     return;
   }
 
-  self.active = false;  
+  var direction = side=='left' ? 1 : -1;
 
-  base.css({
-    display:'block'
+
+  var edge_target_rotation = side=='left' ? 180 : -180;
+  var edge_middle_rotation = side=='left' ? 90 : -90;
+  var edge_reset_rotation = side=='left' ? -180 : 180;
+
+  var frontleaf = this[side + 'front'];
+  var backleaf = this[side + 'back'];
+  var edge = this[side + 'edge'];
+
+  self.processmask(frontleaf, 5);
+  self.processmask(backleaf, 5);
+
+  //this.frontleafelems.append(frontleaf);
+  //this.leafelems.append(backleaf);
+
+  // initial setup
+  //setRotation(this.leftback, -90);
+  //setRotation(this.rightback, 90);
+
+  //setRotation(edge, side=='left' ? 0 : 180);
+
+  edge.css({
+    opacity:0
   })
 
-  otherleaf.insertBefore(leaf);
+  setupAnimator(edge, 'after', self.options.animtime/2, function(){
+    
+    setupAnimator(edge, 'before', self.options.animtime/2, function(){
+      
+      
+
+    })
+
+    setTimeout(function(){
+      edge.css({
+        opacity:0
+      })
+    }, (3*self.options.animtime)/8);
+
+    setRotation(edge, edge_target_rotation);  
+    
+  });
+
+  setupAnimator(frontleaf, 'after', self.options.animtime/2, function(){
+
+    frontleaf.css({
+      opacity:0
+    })
+
+    backleaf.css({
+      opacity:1
+    })
+
+    setupAnimator(backleaf, 'before', self.options.animtime/2, function(){
+
+      self.emit('animated', side, nextpage);
+      self.load_page(nextpage);
+    })
+
+    setRotation(backleaf, 0);
+    
+    
+  });
+
+  setTimeout(function(){
+    edge.css({
+      opacity:1
+    })
+  }, self.options.animtime/8);
+
+  self.emit('animate', side, nextpage);
+
+  removeAnimator(backleaf);
+  setRotation(frontleaf, direction * 90);
+  setRotation(edge, edge_middle_rotation);
+  
+/*
+  var frontleaf = this[side + 'front'];
+  var backleaf = this[side + 'back'];
+
+  self.active = false;  
+
 
   leaf.find('.leaf').each(function(i){
     self.processmask($(this), self.options.masksize);
   })
 
 
-  setAnimationTime(leaf, self.options.animtime);
-  setRotation(leaf, side=='left' ? 180 : 0);
+  setupAnimator(frontleaf, self.options.animtime, function(){
+    console.log('-------------------------------------------');
+    console.log('animate callback!');
+  });
 
-  self.emit('animate', side, nextpage);
+  setRotation(frontleaf, side=='left' ? 45 : 45);
+
+//  self.emit('animate', side, nextpage);
 
   setTimeout(function(){
     self.emit('animated', side, nextpage);
     self.load_page(nextpage);
   }, self.options.animtime + 10)
+*/
 
 }
 
+
+
+
+
+
+/*
+
+  animate the book after having shifted the pages around so a non-sequential page is the target
+  
+*/
+PageTurner.prototype.animate_index = function(index){
+  var self = this;
+
+  var side = index>this.currentpage ? 'right' : 'left';
+  var direction = index>this.currentpage ? 1 : -1;
+  var leafname = index>this.currentpage ? 'afterleaf' : 'beforeleaf';
+
+  if(!this.is3d){
+    self.emit('animate', side, index);
+    self.emit('animated', side, index);
+    this.load_page(index);
+    return;
+  }
+
+  var basehtml = this.get_page_html(index);
+  var base = this['base' + side];
+
+  if(base){
+    base.find('.content').html(basehtml);  
+  }
+  
+
+  var leaf = this[side + 'back'];
+
+  if(leaf){
+    leaf.find(' .content').html(basehtml);  
+  }
+  
+  setTimeout(function(){
+    self.animate_direction(direction, index);
+  }, 500)
+}
 
 
 
@@ -11309,9 +11892,31 @@ function setRotation(elem, amount){
   setLeafTransform(elem);
 }
 
-function setAnimationTime(elem, ms){
+var easings = {
+  'linear':'cubic-bezier(0.250, 0.250, 0.750, 0.750)',
+  'easein':'cubic-bezier(0.420, 0.000, 1.000, 1.000)',
+  'easeout':'cubic-bezier(0.000, 0.000, 0.580, 1.000)'
+}
+
+function setupAnimator(elem, sequence, ms, fn){
+  //var easingname = sequence=='before' ? 'easeout' : 'easein';
+  var easingname = sequence=='before' ? 'easein' : 'easeout';
+  var easing = easings[easingname];
+
   ['', '-webkit-', '-moz-', '-ms-', '-o-'].forEach(function(prefix){
-    elem.css(prefix + 'transition', 'all ' + ms + 'ms');
+    elem.css(prefix + 'transition-timing-function', easing);
+    elem.css(prefix + 'transition', prefix + 'transform ' + ms + 'ms ' + easing);
+  })
+
+  afterTransition.once(elem.get(0), function(){
+    fn && fn();
+  });
+}
+
+function removeAnimator(elem){
+  ['', '-webkit-', '-moz-', '-ms-', '-o-'].forEach(function(prefix){
+    elem.css(prefix + 'transition-timing-function', '');
+    elem.css(prefix + 'transition', '');
   })
 }
 
@@ -11322,18 +11927,13 @@ function setPerspective(elem, amount){
 }
 });
 require.register("binocarlos-pageturner/templates/booktemplate.js", function(exports, require, module){
-module.exports = '<div class="pageturner-book">\n	<div id="base">\n\n	</div>\n	<div id="leaves">\n\n	</div>\n</div>';
+module.exports = '<div class="pageturner-book">\n	<div id="base">\n\n	</div>\n	<div id="fronts">\n\n	</div>\n	<div id="backs">\n\n	</div>\n	<div id="edges">\n\n	</div>\n</div>';
 });
 require.register("binocarlos-storytimeisland-platform/index.js", function(exports, require, module){
-// this is the stub
-
-var has3d = require('has-translate3d');
-
 module.exports = function storytimeisland_platform(options){
   
   options = options || {};
 
-  var is_3d = options.allow3d && has3d;
   var is_phonegap = options.is_phonegap;
   var is_android = false;
 
@@ -11345,11 +11945,6 @@ module.exports = function storytimeisland_platform(options){
     */
     if((device.platform || '').toLowerCase().match(/android/)){
       is_android = true;
-
-      // android < 4 is not 3d
-      if(device.version<4){
-        is_3d = false;
-      }
     }
 
     
@@ -11357,7 +11952,6 @@ module.exports = function storytimeisland_platform(options){
 
   return {
     is_phonegap:is_phonegap,
-    is_3d:is_3d,
     is_android:is_android
   }
 }
@@ -12752,7 +13346,7 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     return ret;
   }
 
-  function render_block(block, evpos){
+  function render_block(block, evpos, nosound){
 
     /*
     
@@ -12803,7 +13397,13 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
       removepopup(popup);
     }, 3000);
 
-    dictionary_handle.emit('sound', mp3);
+    if(nosound){
+
+    }
+    else{
+      dictionary_handle.emit('sound', mp3);  
+    }
+    
   }
 
 
@@ -12855,7 +13455,7 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
     convert the given index of dictionary item into co-ords to trigger it
     
   */
-  function render_index(index){
+  function render_index(index, nosound){
     var entry = dict_array[index];
     var coords = parse_block(entry);
 
@@ -12873,7 +13473,7 @@ module.exports = function storytimeisland_dictionary(page, currentpos, currentsi
       trigger_coord.x -= (offset * currentsize.ratio);
     }
 
-    render_block(entry, trigger_coord);
+    render_block(entry, trigger_coord, nosound);
 
     dictionary_handle.emit('hint', entry, trigger_coord);
   }
@@ -13031,7 +13631,6 @@ var MediaLib = require('storytimeisland-media');
 var Dictionary = require('storytimeisland-dictionary');
 var TextHighlighter = require('storytimeisland-texthighlighter');
 var Gallery = require('storytimeisland-gallery');
-
 var template = require('./template');
 
 /*
@@ -13054,6 +13653,7 @@ module.exports = function storytimeisland_book(options){
 
   container.html(template);
 
+  var holderselector = base_selector + ' .storytimeisland_book';
   var bookselector = base_selector + ' #book';
   var shadowselector = base_selector + ' #shadow';
   var lastpageselector = base_selector + ' #lastpage';
@@ -13066,7 +13666,6 @@ module.exports = function storytimeisland_book(options){
   var perspective = options.perspective || 950;
   
   var platform = Platform(options);
-  var is_3d = platform.is_3d;
   var is_phonegap = platform.is_phonegap;
 
   var active = false;
@@ -13093,6 +13692,7 @@ module.exports = function storytimeisland_book(options){
     ELEM
     
   */
+  var holderelem = $(holderselector);
   var bookelem = $(bookselector);
   var shadowelem = $(shadowselector);
   var lastpageelem = $(lastpageselector);
@@ -13135,7 +13735,7 @@ module.exports = function storytimeisland_book(options){
 
   // then create the pageturner
   var book = new PageTurner({
-    has3d:is_3d,
+    has3d:options.allow3d,
     bookselector:bookselector,
     pageselector:'.page',
     apply_pageclass:'bookpage',
@@ -13222,34 +13822,6 @@ module.exports = function storytimeisland_book(options){
 
   /*
   
-    SIZING
-    
-  */
-  var shadowtimeout = null;
-
-  $(window).on('resize', function(){
-    shadowelem.css({
-      opacity:0
-    });
-    clearTimeout(shadowtimeout);
-    shadowtimeout = setTimeout(function(){
-      shadowelem.css({
-        opacity:1
-      });
-    }, 500)
-    if(activedictionary){
-      activedictionary.reset();
-    }
-
-    if(activehighlighter){
-      activehighlighter.reset();
-    }
-    
-  })
-
-
-  /*
-  
     GALLERY
     
   */
@@ -13305,6 +13877,7 @@ module.exports = function storytimeisland_book(options){
   book.activate = function(){
     active = true;
     media.stopsounds();
+
     book.emit('resize', {
       width:bookelem.width(),
       height:bookelem.height()
@@ -13332,13 +13905,64 @@ module.exports = function storytimeisland_book(options){
     gallery.$elem.fadeOut();
   }
 
+
   /*
   
-    LOGIC EVENTS
+    SIZING
     
   */
-  book.on('resize', function(newsize){
+  var shadowtimeout = null;
+
+  $(window).on('resize', function(){
+    /*
+    shadowelem.css({
+      opacity:0
+    });*/
+
+    /*
+    holderelem.css({
+      opacity:0
+    })
+  
+    clearTimeout(shadowtimeout);
+    shadowtimeout = setTimeout(function(){
+      shadowelem.css({
+        opacity:1
+      });
+    }, 100)
     
+    if(activedictionary){
+      activedictionary.reset();
+    }
+
+    if(activehighlighter){
+      activehighlighter.reset();
+    }*/
+    
+  })
+
+  var lastsize = null;
+
+  book.on('resize', function(newsize){
+
+    if(!newsize){
+      newsize = lastsize;
+    }
+
+    lastsize = newsize;
+    
+    if(activedictionary){
+      activedictionary.reset();
+    }
+
+    if(activehighlighter){
+      activehighlighter.reset();
+    }
+
+    holderelem.css({
+      opacity:0
+    })
+
     if(activedictionary){
       activedictionary.reset();
     }
@@ -13361,11 +13985,12 @@ module.exports = function storytimeisland_book(options){
       currentsize.dictionary_offset = (bookdata.config.realwidth - bookdata.config.width)/2;
 
       var windowsize = {
-        width:container.parent().width(),
-        height:container.parent().height()
+        width:$(window).width(),
+        height:$(window).height()
       }
 
       var xpos = windowsize.width/2 - newsize.width/2;
+
       var ypos = windowsize.height/2 - newsize.height/2;
 
       currentpos = {
@@ -13374,7 +13999,7 @@ module.exports = function storytimeisland_book(options){
       }  
 
       lastpageelem.css({
-        left:xpos + 'px',
+        //left:xpos + 'px',
         'margin-left':(currentsize.width/2) + 'px',
         top:ypos + 'px'
       })
@@ -13382,12 +14007,26 @@ module.exports = function storytimeisland_book(options){
       lastpageelem.width(currentsize.width/2).height(currentsize.height);
     
       shadowelem.css({
-        left:currentpos.x + 'px',
-        top:currentpos.y + 'px',
+        //left:currentpos.x + 'px',
+        //top:currentpos.y + 'px',
         'margin-left':shadow_offset(get_current_page())
       }).height(newsize.height).width(shadow_width(get_current_page()))
+    
+
+      holderelem.css({
+        left:currentpos.x + 'px',
+        top:currentpos.y + 'px'        
+      })
 
       book.load_page(book.currentpage);
+
+      setTimeout(function(){
+        holderelem.hide();
+        holderelem.css({
+          opacity:1
+        })
+        holderelem.fadeIn();
+      }, 500);
 
     }, 10)
 
@@ -13436,8 +14075,8 @@ module.exports = function storytimeisland_book(options){
 
         activehighlighter.elem.css({
           position:'absolute',
-          left:bookelem.offset().left + 'px',
-          top:bookelem.offset().top + 'px'
+        //  left:bookelem.offset().left + 'px',
+        //  top:bookelem.offset().top + 'px'
         })
 
         if(index!=currentindex){
@@ -13464,20 +14103,20 @@ module.exports = function storytimeisland_book(options){
     if(index==1 && !dictionaryhint && activedictionary){
 
       book._cancelhint = false;
-      activedictionary.render_index(0);
+      activedictionary.render_index(0, true);
 
       setTimeout(function(){
         if(book._cancelhint){
           return;
         }
-        activedictionary.render_index(1);
+        activedictionary.render_index(1, true);
       }, 500)
 
       setTimeout(function(){
         if(book._cancelhint){
           return;
         }
-        activedictionary.render_index(2);
+        activedictionary.render_index(2, true);
       }, 1000)
 
       setTimeout(function(){
@@ -13547,10 +14186,17 @@ module.exports = function storytimeisland_book(options){
     if(!active){
       return;
     }
+
+    if(index==0 && book._skip_zero_sounds){
+      book._skip_zero_sounds = false;
+    }
+    else{
+      setTimeout(function(){
+        media.playpagesounds(index, options.play_speech());
+      }, 300)  
+    }
     
-    setTimeout(function(){
-      media.playpagesounds(index, options.play_speech());
-    }, 300)
+    
 
     if(index<bookdata.pages.length-1){
       lastpageelem.hide();
@@ -13561,82 +14207,84 @@ module.exports = function storytimeisland_book(options){
     
   })
 
-  /*
-  
-    TOUCH EVENTS
+  book.activate_touch_events = function(){
+    /*
     
-  */
-  var hammertime = new Hammer($(touch_selector).get(0), {
-    drag_min_distance:10,
-    tap_max_distance:9
-  })
+      TOUCH EVENTS
+      
+    */
+    var hammertime = new Hammer($(touch_selector).get(0), {
+      drag_min_distance:10,
+      tap_max_distance:9
+    })
 
-  hammertime.ondragstart = book.ondragstart = function(ev){
-    book.dragging = true;
-  }
-
-  hammertime.ondrag = book.ondrag = function(ev){
-    if(!book.dragging){
-      return;
+    hammertime.ondragstart = book.ondragstart = function(ev){
+      book.dragging = true;
     }
 
-    if(ev.distance>=15){
-
-      book.dragging = false;
-
-      if(gallery.active){
-        gallery.animate(ev.direction=='left' ? 1 : -1);
+    hammertime.ondrag = book.ondrag = function(ev){
+      if(!book.dragging){
+        return;
       }
-      else{
-        if(book.animating || book.loading){
-          book.triggernext = function(){
-            book.animate_direction(ev.direction=='left' ? 1 : -1);
-          }
-          return;
+
+      if(ev.distance>=15){
+
+        book.dragging = false;
+
+        if(gallery.active){
+          gallery.animate(ev.direction=='left' ? 1 : -1);
         }
         else{
-          book.animate_direction(ev.direction=='left' ? 1 : -1);  
+          if(book.animating || book.loading){
+            book.triggernext = function(){
+              book.animate_direction(ev.direction=='left' ? 1 : -1);
+            }
+            return;
+          }
+          else{
+            book.animate_direction(ev.direction=='left' ? 1 : -1);  
+          }
         }
+        
       }
-      
-    }
-  }
-
-  hammertime.ondragend = book.ondragend = function(ev){
-    book.dragging = false;
-  }
-
-  hammertime.ontap = book.ontap = function(ev){
-    if(gallery.active){
-      gallery.tap(ev);
-      return;
     }
 
-    var elem = ev.originalEvent.srcElement;
-
-    var book = $(elem).closest('#book');
-
-    if(book.length<=0){
-      return;
+    hammertime.ondragend = book.ondragend = function(ev){
+      book.dragging = false;
     }
 
-    var evpos = {
-      x:ev.touches[0].x,
-      y:ev.touches[0].y
+    hammertime.ontap = book.ontap = function(ev){
+      if(gallery.active){
+        gallery.tap(ev);
+        return;
+      }
+
+      var elem = ev.originalEvent.srcElement;
+
+      var book = $(elem).closest('#book');
+
+      if(book.length<=0){
+        return;
+      }
+
+      var evpos = {
+        x:ev.touches[0].x,
+        y:ev.touches[0].y
+      }
+
+      if(activedictionary){
+        activedictionary(evpos);
+      }
     }
 
-    if(activedictionary){
-      activedictionary(evpos);
+    hammertime.onswipe = function(ev){
+
+      if(gallery.active && ev.direction=='up'){
+        close_gallery();
+        return;
+      }
+
     }
-  }
-
-  hammertime.onswipe = function(ev){
-
-    if(gallery.active && ev.direction=='up'){
-      close_gallery();
-      return;
-    }
-
   }
 
   book.media = media;
@@ -13651,7 +14299,7 @@ module.exports = function storytimeisland_book(options){
 }
 });
 require.register("binocarlos-storytimeisland-book/template.js", function(exports, require, module){
-module.exports = '<div class="storytimeisland_book">\n    <div id="shadow"></div>\n    <div id="book">\n      \n    </div>\n    <div id="lastpage" style="display:none;position:absolute;padding-left:50px;">\n\n    </div>\n    \n    <div class="arrow leftarrow"></div>\n    <div class="arrow rightarrow"></div>\n</div>';
+module.exports = '<div class="storytimeisland_book halfsize">\n		<div id="bookwrapper">\n	    <div id="shadow"></div>\n	    <div id="book">\n	      \n	    </div>\n	    <div id="lastpage" style="display:none;position:absolute;padding-left:50px;">\n\n	    </div>\n	  </div>\n    \n</div>';
 });
 
 
@@ -13710,28 +14358,18 @@ module.exports = function storytimeisland_application(){
   var home = Home('#home', templates, global_settings);
   var book = Book('#bookviewer', window.$storytimebook, global_settings);
 
-  // hide the homepage and bring the book in
-  function show_book(){
-    home.$elem.hide();
-    home.destroy();
-    book.begin();
-
-    setTimeout(function(){
-      if(!startedfirst){
-        book.media.playpagesounds(0, true);
-        startedfirst = true;
-      }
-      
-    }, 1000);
-  }
-
+ 
   // the teddy homepage speaking
   home.on('teddysound', function(){
     book.media.playsound('audio/teddy/all');
   })
 
-  // they clicked the 'start' button
-  home.on('loadbook', show_book);
+  book.on('begin', function(done){
+    home.$elem.fadeOut(function(){
+      home.destroy();
+      done && done();
+    })
+  })
 
   // the media has loaded - tell buddy to hide
   // show the homepage
@@ -13745,18 +14383,36 @@ module.exports = function storytimeisland_application(){
     loaddone = true;
 
     setTimeout(function(){
-      $('#homeloading').hide()
-      $('#homeloaded').show();
+
+      book.activate();
+
 
       setTimeout(function(){
-        home.start();
-      }, 500)
+
+        $('#homeloading').fadeOut(function(){
+
+          setTimeout(function(){
+            $('#bookviewer').fadeIn();
+
+            $('#homeloaded').fadeIn(function(){
+              setTimeout(function(){
+                home.start();
+              }, 1000)    
+            })  
+          }, 100)
+          
+        
+          
+        })
+
+      }, 1000)
+      
     }, 500)
   })
 
   book.on('gohome', function(){
-    $('#bookviewer').hide();
-    home.$elem.show();
+    home.$elem.fadeIn();
+    $('#teddy').hide();
   })
 
   // tell the book media to load + teddy audio
@@ -13766,109 +14422,6 @@ module.exports = function storytimeisland_application(){
     })
   }, 500)
   
-  /*
-  function show_home(){
-    $('#teddybutton').css({
-      display:'none'
-    });
-    $('#bookviewer').css({
-      display:'none'
-    });
-    activemodule = home_factory(homepage_done);
-    homepage_done = true;
-  }
-
-  function show_book(){
-    $('#teddybutton').css({
-      display:'block'
-    });
-    $('#bookviewer').css({
-      display:'block'
-    });
-    activemodule = book_factory();
-    $('#book').hide();
-    setTimeout(function(){
-      $('#book').fadeIn();
-    }, 1000)
-  }
-
-  show_home();
-
-
-  home_factory.on('loadbook', function(){
-
-  })
-  */
-
-  /*
-
-  book_factory.on('view:page', function(index){
-    setTimeout(function(){
-      media.playpagesounds(index);  
-    }, 300)
-
-    if(index<window.$storytimebook.pages.length-1){
-      $('#lastpagehtml').hide();
-    }
-    else{
-      $('#lastpagehtml').show();
-    }
-    
-  })
-
-  book_factory.on('animate', function(){
-    media.stopsounds();
-  })
-
-  book_factory.on('dictionary', function(mp3){
-    media.playdictionarysound(mp3);
-  })
-
-  book_factory.on('gohome', function(mp3){
-    media.stopsounds();
-    activemodule.destroy();
-    setTimeout(function(){
-      show_home();  
-    }, 10)
-  })
-
-
-
-
-
-  function show_home(){
-    $('#teddybutton').css({
-      display:'none'
-    });
-    $('#bookviewer').css({
-      display:'none'
-    });
-    activemodule = home_factory(homepage_done);
-    homepage_done = true;
-  }
-
-  function show_book(){
-    $('#teddybutton').css({
-      display:'block'
-    });
-    $('#bookviewer').css({
-      display:'block'
-    });
-    activemodule = book_factory();
-    $('#book').hide();
-    setTimeout(function(){
-      $('#book').fadeIn();
-    }, 1000)
-  }
-
-  function load_all(){
-    media.load({
-      sounds:['audio/teddy/all']
-    })
-  }
-
-  setTimeout(load_all, 100);
-    */
 
 }
 
@@ -13906,21 +14459,50 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
     }
   })
 
+  book._y_adjust = 100;
+
+
+  book.fullsize = function(){
+    $('.storytimeisland_book').removeClass('halfsize');
+  }
+
+  book.halfsize = function(){
+    
+    $('.storytimeisland_book').addClass('halfsize');
+  }
+
+  var activated_touch = false;
+
   book.begin = function(){
-    bookactive = true;
-    $('#teddybutton').css({
-      display:'block'
-    });
-    $('#bookviewer').show();
-    setTimeout(function(){
-      book.activate();
+    book.media.stopsounds();
+    book.emit('begin', function(){
+
+      book.fullsize();
+      bookactive = true;
 
       setTimeout(function(){
-        $('.arrow').css({
-          opacity:1
-        })
-      }, 100)
-    }, 10)
+        book.media.playpagesounds(0, true);
+      }, 1000);
+
+      if(!activated_touch){
+        activated_touch = true;  
+        book.activate_touch_events();
+      }
+      
+      $('#teddybutton').css({
+        display:'block'
+      });
+      
+      setTimeout(function(){
+
+        setTimeout(function(){
+          $('.arrow').css({
+            opacity:1
+          })
+        }, 100)
+      }, 10)
+    })
+    
   }
 
   var leftarrowelem = $('.leftarrow');
@@ -13991,13 +14573,21 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
     $('.arrow').css({
       opacity:0
     })
+    book._skip_zero_sounds = true;
     bookactive = false;
     book.media.stopsounds();
-    book.emit('gohome');
+    
     book.resetgallery();
+    
+    book.animate_index(0);
     $('#homebutton').hide();
     $('#teddybutton .normal').show();
     $('#teddybutton .highlight').hide();
+
+    setTimeout(function(){
+      book.emit('gohome');
+      book.halfsize();
+    }, 2000)
   }
 
   var bodytap = new Hammer($('body').get(0), {
@@ -14020,19 +14610,35 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
     else if(target.closest('#homebutton').length>0){
       home_button_click();
     }
+    else if(target.closest('#bookviewer').length>0){
+      if(bookactive){
+        return;
+      }
+
+      book.begin();
+    }
     
   }
 
 
   bodytap.ondragstart = function(ev){
+    if(!bookactive){
+      return;
+    }
     book.ondragstart(ev);
   }
 
   bodytap.ondrag = function(ev){
+    if(!bookactive){
+      return;
+    }
     book.ondrag(ev);
   }
 
   bodytap.ondragend = function(ev){
+    if(!bookactive){
+      return;
+    }
     book.ondragend(ev);
   }
 
@@ -14108,9 +14714,14 @@ module.exports = function storytimeisland_home(homeselector, templates, global_s
       return;
     }
 
-    $('#frontpageimage').addClass('animated').addClass('tada');
+    $('#bookwrapper').addClass('animated').addClass('tada');
     setTimeout(function(){
-      $('#frontpageimage').removeClass('animated').removeClass('tada');
+      $('#bookwrapper').removeClass('animated').removeClass('tada');
+
+      // remove the teddy once hes done his bit
+      $('#teddy').fadeOut(1000, function(){
+        $('#teddy').remove();
+      })
     }, 2000)
 
 
@@ -14361,13 +14972,13 @@ module.exports = function storytimeisland_teddy(selector, templates){
         },
 
         function(next){
-          set_arm(1);
+          set_arm(2);
           self.emit('bubblemode', true);
           timeoutids.animate = setTimeout(next, 2500);
         },
 
         function(next){
-          set_arm(2);
+          set_arm(1);
           self.emit('bubblemode', false);
           timeoutids.animate = setTimeout(next, 2500);
         },
@@ -14445,6 +15056,9 @@ module.exports = function storytimeisland_teddy(selector, templates){
 
 
 
+
+
+
 require.alias("component-emitter/index.js", "storytimeislandbook/deps/emitter/index.js");
 require.alias("component-emitter/index.js", "emitter/index.js");
 require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
@@ -14481,6 +15095,24 @@ require.alias("component-transform-property/index.js", "binocarlos-pageturner/de
 
 require.alias("component-jquery/index.js", "binocarlos-pageturner/deps/jquery/index.js");
 
+require.alias("pgherveou-transitionend/index.js", "binocarlos-pageturner/deps/transitionend/index.js");
+require.alias("pgherveou-transitionend/index.js", "binocarlos-pageturner/deps/transitionend/index.js");
+require.alias("pgherveou-prefix/index.js", "pgherveou-transitionend/deps/prefix/index.js");
+require.alias("pgherveou-prefix/index.js", "pgherveou-transitionend/deps/prefix/index.js");
+require.alias("pgherveou-prefix/index.js", "pgherveou-prefix/index.js");
+require.alias("pgherveou-transitionend/index.js", "pgherveou-transitionend/index.js");
+require.alias("anthonyshort-after-transition/index.js", "binocarlos-pageturner/deps/after-transition/index.js");
+require.alias("anthonyshort-after-transition/index.js", "binocarlos-pageturner/deps/after-transition/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-after-transition/deps/has-transitions/index.js");
+require.alias("anthonyshort-has-transitions/index.js", "anthonyshort-has-transitions/index.js");
+require.alias("anthonyshort-css-emitter/index.js", "anthonyshort-after-transition/deps/css-emitter/index.js");
+require.alias("component-emitter/index.js", "anthonyshort-css-emitter/deps/emitter/index.js");
+require.alias("component-indexof/index.js", "component-emitter/deps/indexof/index.js");
+
+require.alias("component-event/index.js", "anthonyshort-css-emitter/deps/event/index.js");
+
+require.alias("anthonyshort-after-transition/index.js", "anthonyshort-after-transition/index.js");
 require.alias("binocarlos-pageturner/index.js", "binocarlos-pageturner/index.js");
 require.alias("component-hammer.js/index.js", "binocarlos-storytimeisland-book/deps/hammer/index.js");
 

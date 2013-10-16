@@ -128,13 +128,13 @@ module.exports = function storytimeisland_teddy(selector, templates){
         },
 
         function(next){
-          set_arm(1);
+          set_arm(2);
           self.emit('bubblemode', true);
           timeoutids.animate = setTimeout(next, 2500);
         },
 
         function(next){
-          set_arm(2);
+          set_arm(1);
           self.emit('bubblemode', false);
           timeoutids.animate = setTimeout(next, 2500);
         },

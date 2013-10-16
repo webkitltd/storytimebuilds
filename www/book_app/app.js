@@ -25,28 +25,18 @@ module.exports = function storytimeisland_application(){
   var home = Home('#home', templates, global_settings);
   var book = Book('#bookviewer', window.$storytimebook, global_settings);
 
-  // hide the homepage and bring the book in
-  function show_book(){
-    home.$elem.hide();
-    home.destroy();
-    book.begin();
-
-    setTimeout(function(){
-      if(!startedfirst){
-        book.media.playpagesounds(0, true);
-        startedfirst = true;
-      }
-      
-    }, 1000);
-  }
-
+ 
   // the teddy homepage speaking
   home.on('teddysound', function(){
     book.media.playsound('audio/teddy/all');
   })
 
-  // they clicked the 'start' button
-  home.on('loadbook', show_book);
+  book.on('begin', function(done){
+    home.$elem.fadeOut(function(){
+      home.destroy();
+      done && done();
+    })
+  })
 
   // the media has loaded - tell buddy to hide
   // show the homepage
@@ -60,18 +50,36 @@ module.exports = function storytimeisland_application(){
     loaddone = true;
 
     setTimeout(function(){
-      $('#homeloading').hide()
-      $('#homeloaded').show();
+
+      book.activate();
+
 
       setTimeout(function(){
-        home.start();
-      }, 500)
+
+        $('#homeloading').fadeOut(function(){
+
+          setTimeout(function(){
+            $('#bookviewer').fadeIn();
+
+            $('#homeloaded').fadeIn(function(){
+              setTimeout(function(){
+                home.start();
+              }, 1000)    
+            })  
+          }, 100)
+          
+        
+          
+        })
+
+      }, 1000)
+      
     }, 500)
   })
 
   book.on('gohome', function(){
-    $('#bookviewer').hide();
-    home.$elem.show();
+    home.$elem.fadeIn();
+    $('#teddy').hide();
   })
 
   // tell the book media to load + teddy audio
@@ -81,109 +89,6 @@ module.exports = function storytimeisland_application(){
     })
   }, 500)
   
-  /*
-  function show_home(){
-    $('#teddybutton').css({
-      display:'none'
-    });
-    $('#bookviewer').css({
-      display:'none'
-    });
-    activemodule = home_factory(homepage_done);
-    homepage_done = true;
-  }
-
-  function show_book(){
-    $('#teddybutton').css({
-      display:'block'
-    });
-    $('#bookviewer').css({
-      display:'block'
-    });
-    activemodule = book_factory();
-    $('#book').hide();
-    setTimeout(function(){
-      $('#book').fadeIn();
-    }, 1000)
-  }
-
-  show_home();
-
-
-  home_factory.on('loadbook', function(){
-
-  })
-  */
-
-  /*
-
-  book_factory.on('view:page', function(index){
-    setTimeout(function(){
-      media.playpagesounds(index);  
-    }, 300)
-
-    if(index<window.$storytimebook.pages.length-1){
-      $('#lastpagehtml').hide();
-    }
-    else{
-      $('#lastpagehtml').show();
-    }
-    
-  })
-
-  book_factory.on('animate', function(){
-    media.stopsounds();
-  })
-
-  book_factory.on('dictionary', function(mp3){
-    media.playdictionarysound(mp3);
-  })
-
-  book_factory.on('gohome', function(mp3){
-    media.stopsounds();
-    activemodule.destroy();
-    setTimeout(function(){
-      show_home();  
-    }, 10)
-  })
-
-
-
-
-
-  function show_home(){
-    $('#teddybutton').css({
-      display:'none'
-    });
-    $('#bookviewer').css({
-      display:'none'
-    });
-    activemodule = home_factory(homepage_done);
-    homepage_done = true;
-  }
-
-  function show_book(){
-    $('#teddybutton').css({
-      display:'block'
-    });
-    $('#bookviewer').css({
-      display:'block'
-    });
-    activemodule = book_factory();
-    $('#book').hide();
-    setTimeout(function(){
-      $('#book').fadeIn();
-    }, 1000)
-  }
-
-  function load_all(){
-    media.load({
-      sounds:['audio/teddy/all']
-    })
-  }
-
-  setTimeout(load_all, 100);
-    */
 
 }
 

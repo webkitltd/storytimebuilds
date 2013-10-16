@@ -29,21 +29,50 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
     }
   })
 
+  book._y_adjust = 100;
+
+
+  book.fullsize = function(){
+    $('.storytimeisland_book').removeClass('halfsize');
+  }
+
+  book.halfsize = function(){
+    
+    $('.storytimeisland_book').addClass('halfsize');
+  }
+
+  var activated_touch = false;
+
   book.begin = function(){
-    bookactive = true;
-    $('#teddybutton').css({
-      display:'block'
-    });
-    $('#bookviewer').show();
-    setTimeout(function(){
-      book.activate();
+    book.media.stopsounds();
+    book.emit('begin', function(){
+
+      book.fullsize();
+      bookactive = true;
 
       setTimeout(function(){
-        $('.arrow').css({
-          opacity:1
-        })
-      }, 100)
-    }, 10)
+        book.media.playpagesounds(0, true);
+      }, 1000);
+
+      if(!activated_touch){
+        activated_touch = true;  
+        book.activate_touch_events();
+      }
+      
+      $('#teddybutton').css({
+        display:'block'
+      });
+      
+      setTimeout(function(){
+
+        setTimeout(function(){
+          $('.arrow').css({
+            opacity:1
+          })
+        }, 100)
+      }, 10)
+    })
+    
   }
 
   var leftarrowelem = $('.leftarrow');
@@ -114,13 +143,21 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
     $('.arrow').css({
       opacity:0
     })
+    book._skip_zero_sounds = true;
     bookactive = false;
     book.media.stopsounds();
-    book.emit('gohome');
+    
     book.resetgallery();
+    
+    book.animate_index(0);
     $('#homebutton').hide();
     $('#teddybutton .normal').show();
     $('#teddybutton .highlight').hide();
+
+    setTimeout(function(){
+      book.emit('gohome');
+      book.halfsize();
+    }, 2000)
   }
 
   var bodytap = new Hammer($('body').get(0), {
@@ -143,19 +180,35 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
     else if(target.closest('#homebutton').length>0){
       home_button_click();
     }
+    else if(target.closest('#bookviewer').length>0){
+      if(bookactive){
+        return;
+      }
+
+      book.begin();
+    }
     
   }
 
 
   bodytap.ondragstart = function(ev){
+    if(!bookactive){
+      return;
+    }
     book.ondragstart(ev);
   }
 
   bodytap.ondrag = function(ev){
+    if(!bookactive){
+      return;
+    }
     book.ondrag(ev);
   }
 
   bodytap.ondragend = function(ev){
+    if(!bookactive){
+      return;
+    }
     book.ondragend(ev);
   }
 

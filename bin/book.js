@@ -48,14 +48,25 @@ function resize_images(infolder, outfolder){
 
   wrench.mkdirSyncRecursive(outfolder);
 
-  var processor = new ImageProcessor(infolder, outfolder, [{
+  var book_sizes = [{
     width:1024,
     height:768
   },{
     width:102,
     height:77,
     name:'thumb'
-  }])
+  }]
+
+  var icon_sizes = [{
+    width:1024,
+    height:768
+  },{
+    width:102,
+    height:77,
+    name:'thumb'
+  }]
+
+  var processor = new ImageProcessor(infolder, outfolder, book_sizes);
 
   processor.process(function(){
     console.log('-------------------------------------------');
