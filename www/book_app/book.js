@@ -2,9 +2,8 @@
 
 var $ = require('jquery');
 var Emitter = require('emitter');
-var Hammer = require('hammer');
 var BookFactory = require('storytimeisland-book');
-var browser = require("browser-type").browser;
+//var browser = require("browser-type").browser;
 //var Gallery = require('storytimeisland-gallery');
 
 module.exports = function storytimeisland_book(bookselector, data, global_settings){
@@ -165,7 +164,7 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
     tap_max_distance:14
   })
 
-  bodytap.ontap = function(ev){
+  bodytap.on('tap', function(ev){
     var target = $(ev.originalEvent.srcElement);
 
     if(target.hasClass('leftarrow')){
@@ -188,37 +187,38 @@ module.exports = function storytimeisland_book(bookselector, data, global_settin
       book.begin();
     }
     
-  }
+  })
 
 
-  bodytap.ondragstart = function(ev){
+  bodytap.on('drag start', function(ev){
     if(!bookactive){
       return;
     }
     book.ondragstart(ev);
-  }
+  })
 
-  bodytap.ondrag = function(ev){
+  bodytap.on('drag', function(ev){
     if(!bookactive){
       return;
     }
     book.ondrag(ev);
-  }
+  })
 
-  bodytap.ondragend = function(ev){
+  bodytap.on('drag end', function(ev){
     if(!bookactive){
       return;
     }
     book.ondragend(ev);
-  }
+  })
 
+/*
   if(browser.type=='mozilla'){
     $('.leftarrow').click(left_arrow_click);
     $('.rightarrow').click(right_arrow_click);
     $('#teddybutton').click(teddy_button_click);
     $('#homebutton').click(home_button_click);  
   }
-
+*/
   return book;
 }
 

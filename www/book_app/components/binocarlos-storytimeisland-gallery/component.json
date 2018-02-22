@@ -1,0 +1,22 @@
+{
+  "name": "storytimeisland-gallery",
+  "description": "Renders a gallery of pages in a storytime island book",
+  "version": "0.0.3",
+  "keywords": [],
+  "dependencies": {
+    "component/emitter": "*",
+    "component/jquery": "*"
+  },
+  "development": {},
+  "styles": [
+    "gallery.css"
+  ],
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "templates/gallery.js",
+    "templates/gallerypage.js"
+  ],
+  "remotes": [],
+  "repo": "https://raw.githubusercontent.com/binocarlos/storytimeisland-gallery"
+}

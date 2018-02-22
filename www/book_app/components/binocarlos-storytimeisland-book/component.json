@@ -1,0 +1,27 @@
+{
+  "name": "storytimeisland-book",
+  "description": "A book for the storytimeisland series",
+  "version": "0.0.7",
+  "keywords": [],
+  "dependencies": {
+    "component/jquery": "*",
+    "binocarlos/pageturner": "*",
+    "binocarlos/storytimeisland-platform": "*",
+    "binocarlos/storytimeisland-media": "*",
+    "binocarlos/storytimeisland-texthighlighter": "*",
+    "binocarlos/storytimeisland-dictionary": "*",
+    "binocarlos/storytimeisland-gallery": "*"
+  },
+  "development": {},
+  "styles": [
+    "book.css"
+  ],
+  "main": "index.js",
+  "scripts": [
+    "index.js",
+    "template.js",
+    "hammer.js"
+  ],
+  "remotes": [],
+  "repo": "https://raw.githubusercontent.com/binocarlos/storytimeisland-book"
+}

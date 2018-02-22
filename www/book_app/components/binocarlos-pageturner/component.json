@@ -1,0 +1,33 @@
+{
+  "name": "pageturner",
+  "repo": "binocarlos/pageturner",
+  "description": "A jQuery widget that turns HTML into a CSS 3d book",
+  "version": "0.1.1",
+  "keywords": [],
+  "dependencies": {
+    "component/emitter": "*",
+    "component/domify": "*",
+    "component/css": "*",
+    "component/has-translate3d": "*",
+    "juliangruber/prefixed": "*",
+    "component/transform-property": "*",
+    "anthonyshort/after-transition": "*",
+    "ramitos/resize": "*"
+  },
+  "development": {},
+  "license": "MIT",
+  "main": "index.js",
+  "styles": [
+    "pageturner.css"
+  ],
+  "scripts": [
+    "index.js",
+    "controller.js",
+    "tools.js",
+    "book.js",
+    "page.js",
+    "animator.js",
+    "template.js"
+  ],
+  "remotes": []
+}

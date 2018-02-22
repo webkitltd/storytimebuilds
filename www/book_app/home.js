@@ -3,8 +3,8 @@
 var $ = require('jquery');
 var Emitter = require('emitter');
 var Teddy = require('./teddy');
-var gesture = require('gesture');
-var Hammer = require('hammer');
+
+require('storytimeisland-book/hammer')
 
 module.exports = function storytimeisland_home(homeselector, templates, global_settings){
 

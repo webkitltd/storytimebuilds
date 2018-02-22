@@ -6,12 +6,9 @@
   "dependencies": {
     "component/emitter": "*",
     "component/jquery": "*",
-    "component/hammer.js": "*",
-    "component/gesture": "*",
     "binocarlos/storytimeisland-book": "*",
     "esundahl/tada": "*",
-    "esundahl/bounce": "*",
-    "brighthas/browser-type": "*"
+    "esundahl/bounce": "*"    
   },
   "development": {},
   "styles": [

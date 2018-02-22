@@ -1,85 +1,45 @@
 .pageturner-book {
+  position:relative;
+  left:0px;
+  top:0px;
   display: block;
   width:100%;
   height:100%;
 }
 
-.pageturner-book #base{
+.pageturner-book .filler{
+  display: block;
   position:absolute;
-}
-
-.pageturner-book .leafedge{
-  background-color: #fff !important;
+  width:100%;
   height:100%;
-  position: absolute;
 }
 
-.pageturner-book #fronts{
-  position:absolute;
-}
-
-.pageturner-book #backs{
-  position:absolute;
-}
-
-.pageturner-book #edges{
-  position:absolute;
-}
-
-.nobackside{
-  
-  /*
-  -webkit-backface-visibility: hidden;
-  -moz-backface-visibility: hidden;
-  -ms-backface-visibility: hidden;
-  -o-backface-visibility: hidden;
-  backface-visibility: hidden;
-  */
+.pageturner-book .nobackside{
   -webkit-transform: translate3d(0,0,0);
   -moz-transform: translate3d(0,0,0);
   -ms-transform: translate3d(0,0,0);
   -o-transform: translate3d(0,0,0);
   transform: translate3d(0,0,0);
-  
-  
+  -webkit-backface-visibility:hidden;
+  backface-visibility:hidden;
 }
 
-.maintain3d{
+.pageturner-book .maintain3d{
+  
   -webkit-transform-style: preserve-3d;
   -moz-transform-style: preserve-3d;
   -ms-transform-style: preserve-3d;
   -o-transform-style: preserve-3d;
   transform-style: preserve-3d;
-  overflow: visible !important;
-}
-
-.pageturner-book .leafholder{
-  display: block;
-  position: absolute;
-  width:100%;
-  height:100%;
-}
-
-.pageturner-book .leaf{
-  display: block;
-  position: absolute;
-  width:100%;
-  height:100%;
-  /*
-  -webkit-backface-visibility: hidden;
-  -moz-backface-visibility: hidden;
-  -ms-backface-visibility: hidden;
-  -o-backface-visibility: hidden;
-  backface-visibility: hidden; 
-  */ 
   
 }
 
-.pageturner-book .content{
-  display: block;
-  position: absolute;
-  width:100%;
-  height:100%;
+.pageturner-book img { 
+  image-rendering: optimizeQuality;
+  overflow: visible !important;
+  -webkit-background-clip:padding-box;
+  background-clip:padding-box;
+  -ms-interpolation-mode: bicubic;
 }
 
 
@@ -398,7 +358,6 @@ body {
 	animation-name: bounce;
 }
 
-
 html,body{
   width:100%;
   height:100%;
@@ -428,7 +387,7 @@ html,body{
   this ends up inside build so the path is up one
   
  */
- src: url("storytimeislandbook/./sassoon.otf") format('opentype');
+ src: url("storytimeislandbook/sassoon.otf") format('opentype');
 }
 
 .dictionaryhint{
@@ -499,7 +458,7 @@ html,body{
   position:absolute;
   left:10px;
   top:40%;
-  background:url("storytimeislandbook/./img/leftarrow.png");
+  background:url("storytimeislandbook/img/leftarrow.png");
   background-repeat: no-repeat;
   background-position: 0% 50%;
 }
@@ -510,7 +469,7 @@ html,body{
   position:absolute;
   right:10px;
   top:40%;
-  background:url("storytimeislandbook/./img/rightarrow.png");
+  background:url("storytimeislandbook/img/rightarrow.png");
   background-repeat: no-repeat;
   background-position: 100% 50%;
 }
@@ -577,7 +536,7 @@ html,body{
   top:0px;
   width:131px;
   height:307px;
-  background:url("storytimeislandbook/./img/teddy/base.png");
+  background:url("storytimeislandbook/img/teddy/base.png");
 }
 
 #teddy .lefteye{
@@ -586,7 +545,7 @@ html,body{
   top:35px;
   width:17px;
   height:18px;
-  background:url("storytimeislandbook/./img/teddy/eyes_1.png");
+  background:url("storytimeislandbook/img/teddy/eyes_1.png");
 }
 
 #teddy .righteye{
@@ -595,7 +554,7 @@ html,body{
   top:35px;
   width:17px;
   height:18px;
-  background:url("storytimeislandbook/./img/teddy/eyes_1.png");
+  background:url("storytimeislandbook/img/teddy/eyes_1.png");
 }
 
 
@@ -614,7 +573,7 @@ html,body{
   height:32px;
   position: absolute;
   left: 0px;
-  background:url("storytimeislandbook/./img/teddy/mouth.png");
+  background:url("storytimeislandbook/img/teddy/mouth.png");
   background-position:0px 0px;
 }
 
@@ -624,7 +583,7 @@ html,body{
   top:67px;
   width:92px;
   height:122px;
-  background:url("storytimeislandbook/./img/teddy/arm_1.png");
+  background:url("storytimeislandbook/img/teddy/arm_1.png");
 }
 
 .pointercursor{
@@ -1054,19 +1013,19 @@ html,body{
 
 @media only screen and (max-height: 600px) {
   body{
-    background:url("storytimeislandbook/./img/wood_1062x600.jpg");
+    background:url("storytimeislandbook/img/wood_1062x600.jpg");
   }
 }
 
 @media only screen and (min-height: 601px) and (max-height: 768px) {
   body{
-    background:url("storytimeislandbook/./img/wood_1024x768.jpg");
+    background:url("storytimeislandbook/img/wood_1024x768.jpg");
   }
 }
 
 @media only screen and (min-height: 769px) {
   body{
-    background:url("storytimeislandbook/./img/wood_1920x1080.jpg");
+    background:url("storytimeislandbook/img/wood_1920x1080.jpg");
   }
 }
 
